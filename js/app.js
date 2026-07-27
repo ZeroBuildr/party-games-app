@@ -39,6 +39,10 @@ function navTo(pageName) {
     updateNav(pageName);
   }
 
+  if (pageName === 'wordbank-manager' && typeof initWordbankManager === 'function') {
+    initWordbankManager();
+  }
+
   if (page) {
     page.scrollTop = 0;
   }

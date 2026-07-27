@@ -422,28 +422,71 @@ const wordGuessWords = {
   ],
 };
 
-// 获取谁是卧底的词汇对
+// ==================== 自定义词库（localStorage） ====================
+const STORAGE_KEY_UC = 'partygame_custom_uc';
+const STORAGE_KEY_WG = 'partygame_custom_wg';
+
+function getCustomUC() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_UC) || '{}');
+  } catch (e) { return {}; }
+}
+
+function getCustomWG() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_WG) || '{}');
+  } catch (e) { return {}; }
+}
+
+function saveCustomUC(data) {
+  localStorage.setItem(STORAGE_KEY_UC, JSON.stringify(data));
+}
+
+function saveCustomWG(data) {
+  localStorage.setItem(STORAGE_KEY_WG, JSON.stringify(data));
+}
+
+// 获取谁是卧底的词汇对（内置 + 自定义）
 function getUndercoverPairs(category) {
+  const custom = getCustomUC();
   if (category === 'all') {
     let all = [];
     for (let cat in undercoverWordPairs) {
       all = all.concat(undercoverWordPairs[cat]);
+      if (custom[cat]) all = all.concat(custom[cat]);
+    }
+    // 纯自定义分类
+    for (let cat in custom) {
+      if (!undercoverWordPairs[cat]) {
+        all = all.concat(custom[cat]);
+      }
     }
     return all;
   }
-  return undercoverWordPairs[category] || undercoverWordPairs.food;
+  const builtin = undercoverWordPairs[category] || [];
+  const userCustom = custom[category] || [];
+  return builtin.concat(userCustom);
 }
 
-// 获取猜词助手的词汇
+// 获取猜词助手的词汇（内置 + 自定义）
 function getWordGuessWords(category) {
+  const custom = getCustomWG();
   if (category === 'all') {
     let all = [];
     for (let cat in wordGuessWords) {
       all = all.concat(wordGuessWords[cat]);
+      if (custom[cat]) all = all.concat(custom[cat]);
+    }
+    for (let cat in custom) {
+      if (!wordGuessWords[cat]) {
+        all = all.concat(custom[cat]);
+      }
     }
     return all;
   }
-  return wordGuessWords[category] || wordGuessWords.food;
+  const builtin = wordGuessWords[category] || [];
+  const userCustom = custom[category] || [];
+  return builtin.concat(userCustom);
 }
 
 // 打乱数组
@@ -456,14 +499,33 @@ function shuffleArray(array) {
   return arr;
 }
 
-// 获取总词汇数
+// 获取总词汇数（内置 + 自定义）
 function getTotalWordCount() {
   let count = 0;
+  const customUC = getCustomUC();
+  const customWG = getCustomWG();
   for (let cat in undercoverWordPairs) {
     count += undercoverWordPairs[cat].length;
+    if (customUC[cat]) count += customUC[cat].length;
+  }
+  for (let cat in customUC) {
+    if (!undercoverWordPairs[cat]) count += customUC[cat].length;
   }
   for (let cat in wordGuessWords) {
     count += wordGuessWords[cat].length;
+    if (customWG[cat]) count += customWG[cat].length;
+  }
+  for (let cat in customWG) {
+    if (!wordGuessWords[cat]) count += customWG[cat].length;
   }
   return count;
+}
+
+// 获取分类中文名映射
+function getCategoryNames() {
+  return {
+    food: '食物', star: '明星', daily: '日常', idiom: '成语',
+    animal: '动物', movie: '影视', sports: '运动', travel: '旅游',
+    tech: '科技', nature: '自然', job: '职业', music: '音乐',
+  };
 }

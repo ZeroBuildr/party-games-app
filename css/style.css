@@ -1973,3 +1973,169 @@ body::after {
   background: rgba(232, 93, 58, 0.2);
   color: var(--ink);
 }
+
+/* ==================== 词库管理页 ==================== */
+.wb-manager-content {
+  padding: 0 16px 80px;
+}
+
+.wb-game-tabs {
+  display: flex;
+  gap: 0;
+  margin: 12px 0 16px;
+  background: var(--bg2);
+  border-radius: 22px;
+  padding: 4px;
+}
+
+.wb-game-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+}
+
+.wb-game-tab.active {
+  background: var(--white);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(232, 93, 58, 0.1);
+}
+
+.wb-category-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0 12px;
+  scrollbar-width: none;
+}
+
+.wb-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.wb-cat-chip {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 20px;
+  background: var(--bg2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  white-space: nowrap;
+}
+
+.wb-cat-chip.active {
+  background: var(--gradient);
+  color: var(--white);
+  box-shadow: 0 2px 10px rgba(232, 93, 58, 0.25);
+}
+
+.wb-list-header {
+  margin-bottom: 12px;
+}
+
+.wb-list-count {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.wb-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.wb-word-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.wb-word-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg2);
+  border-radius: 14px;
+  font-size: 14px;
+  color: var(--ink);
+  transition: all 0.2s var(--ease-spring);
+}
+
+.wb-word-item.custom {
+  background: rgba(46, 196, 182, 0.12);
+  border: 1px solid rgba(46, 196, 182, 0.3);
+}
+
+.wb-word-text {
+  line-height: 1.4;
+}
+
+.wb-word-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.wb-word-del:active {
+  transform: scale(0.85);
+}
+
+.wb-add-section {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--rule);
+}
+
+.wb-add-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.wb-input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.wb-input-row .input-field {
+  flex: 1;
+}
+
+.wb-input-single {
+  margin-bottom: 12px;
+}
+
+/* 设置项可点击 */
+.setting-item.clickable {
+  cursor: pointer;
+  transition: background 0.2s var(--ease-smooth);
+}
+
+.setting-item.clickable:active {
+  background: var(--bg2);
+}
