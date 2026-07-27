@@ -15,17 +15,32 @@ const app = {
 
 // ==================== 页面导航 ====================
 function navTo(pageName) {
+  // 清理计时器：离开谁是卧底描述阶段时
+  if (app.currentPage === 'undercover-describe' && pageName !== 'undercover-describe') {
+    if (typeof uc !== 'undefined' && uc.describeTimer) {
+      clearInterval(uc.describeTimer);
+      uc.describeTimer = null;
+    }
+  }
+  // 清理猜词助手计时器
+  if (app.currentPage === 'wordguess-play' && pageName !== 'wordguess-play') {
+    if (typeof wg !== 'undefined' && wg.timer) {
+      clearInterval(wg.timer);
+      wg.timer = null;
+    }
+  }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('page-' + pageName);
   if (page) {
     page.classList.add('active');
     app.currentPage = pageName;
   }
-  
+
   if (pageName === 'home' || pageName === 'stats' || pageName === 'settings') {
     updateNav(pageName);
   }
-  
+
   if (page) {
     page.scrollTop = 0;
   }

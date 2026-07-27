@@ -216,17 +216,26 @@ function updateDescribePage() {
 function startDescribeTimer() {
   if (uc.describeTimer) {
     clearInterval(uc.describeTimer);
+    uc.describeTimer = null;
   }
-  
+
+  // 不限时模式
+  if (app.settings.describeTime === 0) {
+    uc.describeTimeLeft = 0;
+    updateDescribeTimerDisplay();
+    return;
+  }
+
   uc.describeTimeLeft = app.settings.describeTime;
   updateDescribeTimerDisplay();
-  
+
   uc.describeTimer = setInterval(() => {
     uc.describeTimeLeft--;
     updateDescribeTimerDisplay();
-    
+
     if (uc.describeTimeLeft <= 0) {
       clearInterval(uc.describeTimer);
+      uc.describeTimer = null;
       vibrate(100);
       nextSpeaker();
     }
@@ -236,8 +245,16 @@ function startDescribeTimer() {
 function updateDescribeTimerDisplay() {
   const timerEl = document.getElementById('uc-describe-timer');
   if (!timerEl) return;
+
+  // 不限时模式
+  if (app.settings.describeTime === 0) {
+    timerEl.textContent = '∞';
+    timerEl.classList.remove('warning');
+    return;
+  }
+
   timerEl.textContent = uc.describeTimeLeft + 's';
-  
+
   if (uc.describeTimeLeft <= 5) {
     timerEl.classList.add('warning');
   } else {
@@ -380,6 +397,22 @@ function showUCResult(eliminatedPlayer, isUndercover) {
 
 function restartUndercover() {
   startSingleUndercover();
+}
+
+// 结束谁是卧底游戏
+function endUndercoverGame() {
+  showConfirmModal('结束游戏', '确定要结束当前游戏吗？当前进度将丢失。', () => {
+    if (uc.describeTimer) {
+      clearInterval(uc.describeTimer);
+      uc.describeTimer = null;
+    }
+    saveStat('undercover', {
+      result: '中途结束',
+      players: uc.playerCount,
+      round: uc.round,
+    });
+    navTo('home');
+  });
 }
 
 // ==================== 数字炸弹 - 单机 ====================

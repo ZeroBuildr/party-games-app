@@ -473,6 +473,24 @@ body::after {
   font-size: 16px;
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+  border: none;
+  padding: 13px 26px;
+  border-radius: 26px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-smooth);
+  box-shadow: 0 3px 12px rgba(214, 48, 49, 0.25);
+}
+
+.btn-danger:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(214, 48, 49, 0.2);
+}
+
 .btn-icon {
   margin-right: 4px;
 }
@@ -717,6 +735,13 @@ body::after {
 
 .btn-vote {
   margin-top: auto;
+}
+
+.btn-end {
+  margin-top: 10px;
+  background: rgba(214, 48, 49, 0.1);
+  color: var(--danger);
+  border: 1.5px solid var(--danger);
 }
 
 /* ==================== 谁是卧底 - 投票页 ==================== */
