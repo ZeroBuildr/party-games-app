@@ -6,19 +6,41 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#6C5CE7">
-  <title>派对游戏盒</title>
+  <title>派对游戏盒 - 多人联机版</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="app">
-    <!-- 游戏大厅 -->
+    <!-- 首页/大厅 -->
     <div id="page-home" class="page active">
       <div class="home-header">
         <h1>派对游戏盒</h1>
-        <p class="subtitle">一个App，搞定所有聚会游戏</p>
+        <p class="subtitle">多人联机 · 点开即玩</p>
       </div>
+      
+      <!-- 房间入口 -->
+      <div class="room-section">
+        <div class="room-card create" onclick="showCreateRoom()">
+          <div class="room-icon">➕</div>
+          <div class="room-info">
+            <h3>创建房间</h3>
+            <p>开个新房，邀请朋友加入</p>
+          </div>
+        </div>
+        <div class="room-card join" onclick="showJoinRoom()">
+          <div class="room-icon">🚪</div>
+          <div class="room-info">
+            <h3>加入房间</h3>
+            <p>输入房间号加入朋友的游戏</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"><span>或者选择单机模式</span></div>
+
+      <!-- 游戏列表（单机模式入口） -->
       <div class="game-list">
-        <div class="game-card" onclick="navTo('undercover-setup')">
+        <div class="game-card" onclick="startSingleGame('undercover')">
           <div class="game-emoji">🕵️</div>
           <div class="game-info">
             <h3>谁是卧底</h3>
@@ -26,7 +48,7 @@
           </div>
           <span class="arrow">›</span>
         </div>
-        <div class="game-card" onclick="navTo('bomb-setup')">
+        <div class="game-card" onclick="startSingleGame('bomb')">
           <div class="game-emoji">💣</div>
           <div class="game-info">
             <h3>数字炸弹</h3>
@@ -34,7 +56,7 @@
           </div>
           <span class="arrow">›</span>
         </div>
-        <div class="game-card" onclick="navTo('wordguess-setup')">
+        <div class="game-card" onclick="startSingleGame('wordguess')">
           <div class="game-emoji">🤔</div>
           <div class="game-info">
             <h3>猜词助手</h3>
@@ -43,19 +65,333 @@
           <span class="arrow">›</span>
         </div>
       </div>
+
       <div class="wordbank-info">
         <span>已收录 500+ 词汇 · 持续更新中</span>
       </div>
     </div>
 
-    <!-- 谁是卧底 - 设置页 -->
-    <div id="page-undercover-setup" class="page">
+    <!-- 创建房间弹窗 -->
+    <div id="create-room-modal" class="modal" style="display:none">
+      <div class="modal-content">
+        <h3>创建房间</h3>
+        <p class="modal-desc">选择游戏类型，创建房间后分享链接邀请朋友</p>
+        
+        <div class="setup-section">
+          <h4>选择游戏</h4>
+          <div class="game-select-list">
+            <div class="game-select-item active" data-game="undercover" onclick="selectGame('undercover')">
+              <span class="gs-emoji">🕵️</span>
+              <span class="gs-name">谁是卧底</span>
+            </div>
+            <div class="game-select-item" data-game="bomb" onclick="selectGame('bomb')">
+              <span class="gs-emoji">💣</span>
+              <span class="gs-name">数字炸弹</span>
+            </div>
+            <div class="game-select-item" data-game="wordguess" onclick="selectGame('wordguess')">
+              <span class="gs-emoji">🤔</span>
+              <span class="gs-name">猜词助手</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-section">
+          <h4>你的昵称</h4>
+          <input type="text" id="create-nickname" class="input-field" placeholder="输入你的昵称" maxlength="10">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-outline" onclick="closeModal('create-room-modal')">取消</button>
+          <button class="btn-primary" onclick="createRoom()">创建房间</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加入房间弹窗 -->
+    <div id="join-room-modal" class="modal" style="display:none">
+      <div class="modal-content">
+        <h3>加入房间</h3>
+        <p class="modal-desc">输入房间号加入朋友的游戏</p>
+        
+        <div class="setup-section">
+          <h4>房间号</h4>
+          <input type="text" id="join-room-id" class="input-field" placeholder="输入6位房间号" maxlength="6">
+        </div>
+
+        <div class="setup-section">
+          <h4>你的昵称</h4>
+          <input type="text" id="join-nickname" class="input-field" placeholder="输入你的昵称" maxlength="10">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-outline" onclick="closeModal('join-room-modal')">取消</button>
+          <button class="btn-primary" onclick="joinRoom()">加入房间</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 房间等待页 -->
+    <div id="page-room-lobby" class="page">
       <div class="top-bar">
-        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="back-btn" onclick="leaveRoom()">‹</span>
+        <span class="page-title">房间等待</span>
+        <span style="width:24px"></span>
+      </div>
+      
+      <div class="room-lobby-content">
+        <div class="room-id-card">
+          <div class="room-id-label">房间号</div>
+          <div class="room-id" id="room-id-display">------</div>
+          <button class="btn-outline btn-sm" onclick="copyRoomLink()">
+            📋 复制分享链接
+          </button>
+        </div>
+
+        <div class="game-type-badge" id="lobby-game-type">
+          🕵️ 谁是卧底
+        </div>
+
+        <div class="player-count">
+          <span id="player-count-num">1</span> / 10 人
+        </div>
+
+        <div class="player-list-section">
+          <h4>玩家列表</h4>
+          <div class="player-grid" id="lobby-player-list">
+            <!-- 玩家卡片动态生成 -->
+          </div>
+        </div>
+
+        <div class="room-settings" id="room-settings-section">
+          <!-- 房主才能看到的设置 -->
+        </div>
+
+        <div class="lobby-actions">
+          <button class="btn-primary btn-full" id="start-game-btn" onclick="startRoomGame()">
+            开始游戏
+          </button>
+          <button class="btn-outline btn-full" style="display:none" id="waiting-btn">
+            等待房主开始...
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 联机版游戏页 -->
+    <div id="page-multi-undercover" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="confirmLeaveGame()">‹</span>
         <span class="page-title">谁是卧底</span>
         <span style="width:24px"></span>
       </div>
+      
+      <div class="multi-game-content">
+        <div class="game-status-bar">
+          <span>第 <span id="mu-round">1</span> 轮</span>
+          <span>剩余 <span id="mu-alive">4</span> 人</span>
+        </div>
+
+        <div class="my-word-card" id="mu-my-word-card">
+          <div class="mw-label">你的词语</div>
+          <div class="mw-word" id="mu-my-word">点击查看</div>
+          <div class="mw-hint">只有你能看到</div>
+        </div>
+
+        <div class="phase-info" id="mu-phase-info">
+          <div class="phase-title">描述阶段</div>
+          <div class="phase-desc">当前发言：<span id="mu-current-speaker">玩家1</span></div>
+        </div>
+
+        <div class="mu-player-list" id="mu-player-list">
+          <!-- 玩家列表 -->
+        </div>
+
+        <div class="game-actions">
+          <button class="btn-primary btn-full" id="mu-next-btn" onclick="muNextSpeaker()">
+            下一位发言
+          </button>
+          <button class="btn-outline btn-full" id="mu-vote-btn" style="display:none" onclick="muGoToVote()">
+            开始投票
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 投票页 -->
+    <div id="page-mu-vote" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('multi-undercover')">‹</span>
+        <span class="page-title">投票环节</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="vote-content">
+        <p class="vote-tip">选出你认为是卧底的玩家</p>
+        <div class="player-list" id="mu-vote-list"></div>
+        <button class="btn-primary btn-full" id="mu-submit-vote" onclick="muSubmitVote()">确认投票</button>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 结果页 -->
+    <div id="page-mu-result" class="page">
+      <div class="result-content">
+        <div class="result-icon" id="mu-result-icon">🎉</div>
+        <h2 id="mu-result-title">平民胜利！</h2>
+        <p id="mu-result-desc">卧底已被找出</p>
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">出局玩家</span>
+            <span class="result-value" id="mu-eliminated">-</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">身份</span>
+            <span class="result-value" id="mu-identity">-</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">平民词</span>
+            <span class="result-value" id="mu-civilian-word">-</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">卧底词</span>
+            <span class="result-value" id="mu-undercover-word">-</span>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="backToLobby()">返回房间</button>
+          <button class="btn-primary" id="mu-restart-btn" onclick="muRestart()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数字炸弹 - 联机版 -->
+    <div id="page-multi-bomb" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="confirmLeaveGame()">‹</span>
+        <span class="page-title">数字炸弹</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="bomb-content">
+        <div class="turn-info">
+          <span class="turn-label">当前轮到</span>
+          <span class="turn-player" id="mb-current-player">玩家 1</span>
+        </div>
+        <div class="bomb-display">
+          <div class="range-label">安全范围</div>
+          <div class="range-num" id="mb-range-display">1 ~ 100</div>
+          <div class="bomb-emoji">💣</div>
+          <div class="bomb-tip">猜一个数字，小心别踩到炸弹！</div>
+        </div>
+        <div class="bomb-input-row" id="mb-input-section">
+          <input type="number" id="mb-input" placeholder="输入数字">
+          <button class="btn-primary" onclick="mbGuess()">猜</button>
+        </div>
+        <div class="bomb-waiting" id="mb-waiting" style="display:none">
+          <p>等待其他玩家猜...</p>
+        </div>
+        <div class="bomb-history">
+          <div class="history-title">历史记录</div>
+          <div class="history-list" id="mb-history-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数字炸弹 - 爆炸页 -->
+    <div id="page-mb-explode" class="page">
+      <div class="explode-content">
+        <div class="explode-emoji">💥</div>
+        <h2>砰！被炸了！</h2>
+        <p class="explode-desc"><span id="mb-loser">-</span> 猜中了炸弹数字 <strong id="mb-answer">-</strong></p>
+        <div class="explode-stats">
+          <div class="stat-item">
+            <div class="stat-num" id="mb-guess-count">-</div>
+            <div class="stat-label">本局猜测次数</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="backToLobby()">返回房间</button>
+          <button class="btn-primary" id="mb-restart-btn" onclick="mbRestart()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 猜词助手 - 联机版 -->
+    <div id="page-multi-wordguess" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="confirmLeaveGame()">‹</span>
+        <span class="page-title">猜词助手</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="wg-play-content">
+        <div class="wg-top-bar">
+          <span class="wg-word-count">第 <span id="mw-word-num">1</span> 个词</span>
+          <span class="wg-timer" id="mw-timer">⏱ 01:00</span>
+        </div>
+        <div class="wg-word-card" id="mw-word-card">
+          <div class="wg-category" id="mw-category">综合</div>
+          <div class="wg-word" id="mw-current-word">点击开始</div>
+          <div class="wg-mode-tip" id="mw-mode-tip">你比我猜模式</div>
+        </div>
+        <div class="wg-team-info">
+          <div class="team-score">
+            <span>当前队得分：</span>
+            <strong id="mw-score">0</strong>
+          </div>
+          <div class="team-turn" id="mw-team-turn">
+            等待开始...
+          </div>
+        </div>
+        <div class="wg-actions" id="mw-actions">
+          <button class="btn-outline wg-btn" onclick="mwSkip()">
+            <span class="btn-icon">⏭</span> 跳过
+          </button>
+          <button class="btn-primary wg-btn" onclick="mwCorrect()">
+            <span class="btn-icon">✓</span> 猜中了
+          </button>
+        </div>
+        <div class="wg-waiting" id="mw-waiting" style="display:none">
+          <p>等待其他队伍...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 猜词助手 - 结果页 -->
+    <div id="page-mw-result" class="page">
+      <div class="result-content">
+        <div class="result-icon">🎉</div>
+        <h2>时间到！</h2>
+        <div class="wg-score-card">
+          <div class="wg-score-num" id="mw-final-score">-</div>
+          <div class="wg-score-label">个词语猜中</div>
+        </div>
+        <div class="wg-result-stats">
+          <div class="wg-stat-item">
+            <div class="wg-stat-num correct" id="mw-final-correct">-</div>
+            <div class="wg-stat-label">猜中</div>
+          </div>
+          <div class="wg-stat-item">
+            <div class="wg-stat-num skip" id="mw-final-skip">-</div>
+            <div class="wg-stat-label">跳过</div>
+          </div>
+          <div class="wg-stat-item">
+            <div class="wg-stat-num total" id="mw-final-total">-</div>
+            <div class="wg-stat-label">总计</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="backToLobby()">返回房间</button>
+          <button class="btn-primary" id="mw-restart-btn" onclick="mwRestart()">下一组</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 单机模式 - 谁是卧底设置页 -->
+    <div id="page-undercover-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">谁是卧底 - 单机</span>
+        <span style="width:24px"></span>
+      </div>
       <div class="setup-content">
+        <div class="mode-badge">📱 单机模式（传手机玩）</div>
         <div class="setup-section">
           <h4>玩家数量</h4>
           <div class="chip-group" id="uc-player-count">
@@ -82,11 +418,11 @@
         <div class="rule-tip">
           <strong>规则提示：</strong><span id="uc-rule-text">4人中1人为卧底，3人为平民。每人轮流描述词语一轮后投票。</span>
         </div>
-        <button class="btn-primary btn-full" onclick="startUndercover()">开始游戏</button>
+        <button class="btn-primary btn-full" onclick="startSingleUndercover()">开始游戏</button>
       </div>
     </div>
 
-    <!-- 谁是卧底 - 发词页 -->
+    <!-- 单机模式 - 谁是卧底发词页 -->
     <div id="page-undercover-deal" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="navTo('undercover-setup')">‹</span>
@@ -111,7 +447,7 @@
       </div>
     </div>
 
-    <!-- 谁是卧底 - 描述阶段 -->
+    <!-- 单机模式 - 谁是卧底描述阶段 -->
     <div id="page-undercover-describe" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="confirmExitUC()">‹</span>
@@ -137,7 +473,7 @@
       </div>
     </div>
 
-    <!-- 谁是卧底 - 投票页 -->
+    <!-- 单机模式 - 谁是卧底投票页 -->
     <div id="page-undercover-vote" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="navTo('undercover-describe')">‹</span>
@@ -151,7 +487,7 @@
       </div>
     </div>
 
-    <!-- 谁是卧底 - 结果页 -->
+    <!-- 单机模式 - 谁是卧底结果页 -->
     <div id="page-undercover-result" class="page">
       <div class="result-content">
         <div class="result-icon" id="uc-result-icon">🎉</div>
@@ -182,14 +518,15 @@
       </div>
     </div>
 
-    <!-- 数字炸弹 - 设置页 -->
+    <!-- 单机模式 - 数字炸弹设置页 -->
     <div id="page-bomb-setup" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="navTo('home')">‹</span>
-        <span class="page-title">数字炸弹</span>
+        <span class="page-title">数字炸弹 - 单机</span>
         <span style="width:24px"></span>
       </div>
       <div class="setup-content">
+        <div class="mode-badge">📱 单机模式（传手机玩）</div>
         <div class="setup-section">
           <h4>数字范围</h4>
           <div class="chip-group" id="bomb-range">
@@ -221,11 +558,11 @@
         <div class="rule-tip">
           <strong>规则：</strong>系统在指定范围内随机设定炸弹数字，玩家轮流猜数字，范围逐渐缩小，猜中者被炸！
         </div>
-        <button class="btn-primary btn-full" onclick="startBomb()">开始游戏</button>
+        <button class="btn-primary btn-full" onclick="startSingleBomb()">开始游戏</button>
       </div>
     </div>
 
-    <!-- 数字炸弹 - 游戏页 -->
+    <!-- 单机模式 - 数字炸弹游戏页 -->
     <div id="page-bomb-play" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="confirmExitBomb()">‹</span>
@@ -254,7 +591,7 @@
       </div>
     </div>
 
-    <!-- 数字炸弹 - 爆炸页 -->
+    <!-- 单机模式 - 数字炸弹爆炸页 -->
     <div id="page-bomb-explode" class="page">
       <div class="explode-content">
         <div class="explode-emoji" id="explode-emoji">💥</div>
@@ -273,14 +610,15 @@
       </div>
     </div>
 
-    <!-- 猜词助手 - 设置页 -->
+    <!-- 单机模式 - 猜词助手设置页 -->
     <div id="page-wordguess-setup" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="navTo('home')">‹</span>
-        <span class="page-title">猜词助手</span>
+        <span class="page-title">猜词助手 - 单机</span>
         <span style="width:24px"></span>
       </div>
       <div class="setup-content">
+        <div class="mode-badge">📱 单机模式（传手机玩）</div>
         <div class="setup-section">
           <h4>游戏模式</h4>
           <div class="mode-list" id="wg-mode">
@@ -328,11 +666,11 @@
             <span class="chip" data-val="120">120秒</span>
           </div>
         </div>
-        <button class="btn-primary btn-full" onclick="startWordGuess()">开始出题</button>
+        <button class="btn-primary btn-full" onclick="startSingleWordGuess()">开始出题</button>
       </div>
     </div>
 
-    <!-- 猜词助手 - 出题页 -->
+    <!-- 单机模式 - 猜词助手出题页 -->
     <div id="page-wordguess-play" class="page">
       <div class="wg-play-content">
         <div class="wg-top-bar">
@@ -365,7 +703,7 @@
       </div>
     </div>
 
-    <!-- 猜词助手 - 结果页 -->
+    <!-- 单机模式 - 猜词助手结果页 -->
     <div id="page-wordguess-result" class="page">
       <div class="result-content">
         <div class="result-icon">🎉</div>
@@ -499,8 +837,8 @@
         </div>
       </div>
       <div class="app-info">
-        <p>派对游戏盒 v1.0</p>
-        <p class="app-info-sub">一款轻量级聚会游戏工具</p>
+        <p>派对游戏盒 v2.0 - 多人联机版</p>
+        <p class="app-info-sub">支持多人实时联机 · 点开即玩</p>
       </div>
     </div>
 
@@ -520,23 +858,46 @@
       </div>
     </div>
 
-    <!-- 确认弹窗 -->
-    <div id="confirm-modal" class="modal" style="display:none">
+    <!-- Toast提示 -->
+    <div id="toast" class="toast" style="display:none"></div>
+
+    <!-- Firebase配置提示弹窗 -->
+    <div id="firebase-setup-modal" class="modal" style="display:none">
       <div class="modal-content">
-        <h3 id="modal-title">确认</h3>
-        <p id="modal-message">确定要退出吗？当前游戏进度将丢失。</p>
+        <h3>🔧 首次使用请配置 Firebase</h3>
+        <p class="modal-desc">多人联机功能需要 Firebase 实时数据库支持。请按照以下步骤配置：</p>
+        <div class="setup-steps">
+          <div class="step-item">
+            <span class="step-num">1</span>
+            <span>访问 <a href="https://console.firebase.google.com/" target="_blank">Firebase 控制台</a></span>
+          </div>
+          <div class="step-item">
+            <span class="step-num">2</span>
+            <span>创建新项目，启用 Realtime Database</span>
+          </div>
+          <div class="step-item">
+            <span class="step-num">3</span>
+            <span>将配置信息填入 <code>js/firebase-config.js</code></span>
+          </div>
+        </div>
+        <p class="modal-desc" style="margin-top:12px;font-size:12px;color:var(--muted)">
+          配置完成后刷新页面即可使用多人联机功能。未配置时可使用单机模式。
+        </p>
         <div class="modal-actions">
-          <button class="btn-outline" onclick="closeModal()">取消</button>
-          <button class="btn-primary" id="modal-confirm-btn" onclick="confirmModal()">确定</button>
+          <button class="btn-primary" onclick="closeModal('firebase-setup-modal')">我知道了</button>
         </div>
       </div>
     </div>
-
-    <!-- Toast提示 -->
-    <div id="toast" class="toast" style="display:none"></div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <script src="js/firebase-config.js"></script>
   <script src="js/wordbank.js"></script>
+  <script src="js/single-mode.js"></script>
+  <script src="js/multiplayer.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
