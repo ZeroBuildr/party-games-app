@@ -4,8 +4,6 @@ const app = {
   currentPage: 'home',
   currentTab: 'home',
   settings: {
-    sound: true,
-    vibrate: true,
     wakelock: true,
     describeTime: 30,
   },
@@ -76,7 +74,7 @@ function showToast(msg, duration = 2000) {
 }
 
 function vibrate(ms = 50) {
-  if (app.settings.vibrate && navigator.vibrate) {
+  if (navigator.vibrate) {
     navigator.vibrate(ms);
   }
 }
@@ -292,34 +290,26 @@ function clearStats() {
 
 // ==================== 设置 ====================
 function saveSettings() {
-  const soundEl = document.getElementById('set-sound');
-  const vibrateEl = document.getElementById('set-vibrate');
   const wakelockEl = document.getElementById('set-wakelock');
   const describeEl = document.getElementById('set-describe-time');
-  
-  if (soundEl) app.settings.sound = soundEl.checked;
-  if (vibrateEl) app.settings.vibrate = vibrateEl.checked;
+
   if (wakelockEl) app.settings.wakelock = wakelockEl.checked;
   if (describeEl) app.settings.describeTime = parseInt(describeEl.value);
-  
+
   saveToStorage();
-  
+
   if (app.settings.wakelock) {
     requestWakeLock();
   }
 }
 
 function loadSettings() {
-  const soundEl = document.getElementById('set-sound');
-  const vibrateEl = document.getElementById('set-vibrate');
   const wakelockEl = document.getElementById('set-wakelock');
   const describeEl = document.getElementById('set-describe-time');
-  
-  if (soundEl) soundEl.checked = app.settings.sound;
-  if (vibrateEl) vibrateEl.checked = app.settings.vibrate;
+
   if (wakelockEl) wakelockEl.checked = app.settings.wakelock;
   if (describeEl) describeEl.value = app.settings.describeTime;
-  
+
   const wordbankInfo = document.getElementById('set-wordbank-info');
   if (wordbankInfo && typeof getTotalWordCount === 'function') {
     const totalWords = getTotalWordCount();
