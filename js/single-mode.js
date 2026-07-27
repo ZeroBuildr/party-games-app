@@ -545,6 +545,12 @@ function updateWGPlayPage() {
     idiom: '成语',
     animal: '动物',
     movie: '影视',
+    sports: '运动',
+    travel: '旅游',
+    tech: '科技',
+    nature: '自然',
+    job: '职业',
+    music: '音乐',
   };
   const catLabel = document.getElementById('wg-category-label');
   if (catLabel) catLabel.textContent = categoryNames[wg.category] || '综合';
