@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#6C5CE7">
+  <title>派对游戏盒</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 游戏大厅 -->
+    <div id="page-home" class="page active">
+      <div class="home-header">
+        <h1>派对游戏盒</h1>
+        <p class="subtitle">一个App，搞定所有聚会游戏</p>
+      </div>
+      <div class="game-list">
+        <div class="game-card" onclick="navTo('undercover-setup')">
+          <div class="game-emoji">🕵️</div>
+          <div class="game-info">
+            <h3>谁是卧底</h3>
+            <p>隐藏身份，互飙演技</p>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+        <div class="game-card" onclick="navTo('bomb-setup')">
+          <div class="game-emoji">💣</div>
+          <div class="game-info">
+            <h3>数字炸弹</h3>
+            <p>紧张刺激，猜中就炸</p>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+        <div class="game-card" onclick="navTo('wordguess-setup')">
+          <div class="game-emoji">🤔</div>
+          <div class="game-info">
+            <h3>猜词助手</h3>
+            <p>海量词库，随机出题</p>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+      </div>
+      <div class="wordbank-info">
+        <span>已收录 500+ 词汇 · 持续更新中</span>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 设置页 -->
+    <div id="page-undercover-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">谁是卧底</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="setup-content">
+        <div class="setup-section">
+          <h4>玩家数量</h4>
+          <div class="chip-group" id="uc-player-count">
+            <span class="chip" data-val="3">3人</span>
+            <span class="chip active" data-val="4">4人</span>
+            <span class="chip" data-val="5">5人</span>
+            <span class="chip" data-val="6">6人</span>
+            <span class="chip" data-val="7">7人</span>
+            <span class="chip" data-val="8">8人</span>
+            <span class="chip" data-val="9">9人</span>
+            <span class="chip" data-val="10">10人</span>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>词库分类</h4>
+          <div class="chip-group" id="uc-category">
+            <span class="chip active" data-val="all">综合</span>
+            <span class="chip" data-val="food">食物</span>
+            <span class="chip" data-val="star">明星</span>
+            <span class="chip" data-val="daily">日常</span>
+            <span class="chip" data-val="idiom">成语</span>
+          </div>
+        </div>
+        <div class="rule-tip">
+          <strong>规则提示：</strong><span id="uc-rule-text">4人中1人为卧底，3人为平民。每人轮流描述词语一轮后投票。</span>
+        </div>
+        <button class="btn-primary btn-full" onclick="startUndercover()">开始游戏</button>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 发词页 -->
+    <div id="page-undercover-deal" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('undercover-setup')">‹</span>
+        <span class="page-title">发词阶段</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="deal-content">
+        <div class="deal-progress">
+          <span>玩家 <span id="uc-current-player">1</span> / <span id="uc-total-players">4</span> 的回合</span>
+        </div>
+        <div class="word-card" id="uc-word-card" onclick="revealWord()">
+          <div class="role-tag" id="uc-role-tag">点击查看你的词语</div>
+          <div class="word" id="uc-word-display">？？？</div>
+          <div class="word-hint" id="uc-word-hint">请确保周围没有其他人偷看</div>
+        </div>
+        <p class="deal-tip">查看完毕后点击下方按钮，将手机传给下一位玩家</p>
+        <button class="btn-primary btn-full" id="uc-next-btn" onclick="nextPlayer()" style="opacity:0.5;pointer-events:none">我记住了，传给下一位</button>
+        <div class="progress-dots">
+          <div id="uc-dots"></div>
+          <p class="dots-label"><span id="uc-viewed-count">0</span> / <span id="uc-total-count">4</span> 已查看</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 描述阶段 -->
+    <div id="page-undercover-describe" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="confirmExitUC()">‹</span>
+        <span class="page-title">描述阶段</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="describe-content">
+        <div class="round-info">
+          <div class="round-badge">第 <span id="uc-round-num">1</span> 轮</div>
+          <div class="alive-count">剩余 <span id="uc-alive-count">4</span> 人</div>
+        </div>
+        <div class="speaker-card">
+          <div class="speaker-num" id="uc-speaker-num">1</div>
+          <div class="speaker-label">当前发言玩家</div>
+          <div class="timer" id="uc-describe-timer">30s</div>
+        </div>
+        <p class="describe-tip">用一句话描述你的词语，不要直接说出词语本身</p>
+        <div class="describe-actions">
+          <button class="btn-outline" onclick="prevSpeaker()">上一位</button>
+          <button class="btn-primary" onclick="nextSpeaker()">下一位</button>
+        </div>
+        <button class="btn-primary btn-full btn-vote" onclick="goToVote()">全部说完，开始投票</button>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 投票页 -->
+    <div id="page-undercover-vote" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('undercover-describe')">‹</span>
+        <span class="page-title">投票环节</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="vote-content">
+        <p class="vote-tip">选出你认为是卧底的玩家</p>
+        <div class="player-list" id="uc-vote-list"></div>
+        <button class="btn-primary btn-full" onclick="submitVote()" id="uc-submit-vote" style="opacity:0.5;pointer-events:none">确认投票</button>
+      </div>
+    </div>
+
+    <!-- 谁是卧底 - 结果页 -->
+    <div id="page-undercover-result" class="page">
+      <div class="result-content">
+        <div class="result-icon" id="uc-result-icon">🎉</div>
+        <h2 id="uc-result-title">平民胜利！</h2>
+        <p id="uc-result-desc">卧底已被找出</p>
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">出局玩家</span>
+            <span class="result-value" id="uc-eliminated">玩家 2</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">身份</span>
+            <span class="result-value" id="uc-identity">卧底</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">平民词</span>
+            <span class="result-value" id="uc-civilian-word">可乐</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">卧底词</span>
+            <span class="result-value" id="uc-undercover-word">雪碧</span>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
+          <button class="btn-primary" onclick="restartUndercover()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数字炸弹 - 设置页 -->
+    <div id="page-bomb-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">数字炸弹</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="setup-content">
+        <div class="setup-section">
+          <h4>数字范围</h4>
+          <div class="chip-group" id="bomb-range">
+            <span class="chip" data-val="50">1-50</span>
+            <span class="chip active" data-val="100">1-100</span>
+            <span class="chip" data-val="200">1-200</span>
+            <span class="chip" data-val="custom">自定义</span>
+          </div>
+          <div class="custom-range" id="bomb-custom-range" style="display:none">
+            <div class="range-inputs">
+              <input type="number" id="bomb-min" placeholder="最小值" value="1">
+              <span class="range-sep">~</span>
+              <input type="number" id="bomb-max" placeholder="最大值" value="99">
+            </div>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>玩家数量</h4>
+          <div class="chip-group" id="bomb-players">
+            <span class="chip" data-val="2">2人</span>
+            <span class="chip" data-val="3">3人</span>
+            <span class="chip active" data-val="4">4人</span>
+            <span class="chip" data-val="5">5人</span>
+            <span class="chip" data-val="6">6人</span>
+            <span class="chip" data-val="7">7人</span>
+            <span class="chip" data-val="8">8人</span>
+          </div>
+        </div>
+        <div class="rule-tip">
+          <strong>规则：</strong>系统在指定范围内随机设定炸弹数字，玩家轮流猜数字，范围逐渐缩小，猜中者被炸！
+        </div>
+        <button class="btn-primary btn-full" onclick="startBomb()">开始游戏</button>
+      </div>
+    </div>
+
+    <!-- 数字炸弹 - 游戏页 -->
+    <div id="page-bomb-play" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="confirmExitBomb()">‹</span>
+        <span class="page-title">数字炸弹</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="bomb-content">
+        <div class="turn-info">
+          <span class="turn-label">当前轮到</span>
+          <span class="turn-player" id="bomb-current-player">玩家 1</span>
+        </div>
+        <div class="bomb-display">
+          <div class="range-label">安全范围</div>
+          <div class="range-num" id="bomb-range-display">1 ~ 100</div>
+          <div class="bomb-emoji" id="bomb-emoji">💣</div>
+          <div class="bomb-tip">猜一个数字，小心别踩到炸弹！</div>
+        </div>
+        <div class="bomb-input-row">
+          <input type="number" id="bomb-input" placeholder="输入数字">
+          <button class="btn-primary" onclick="guessBomb()">猜</button>
+        </div>
+        <div class="bomb-history" id="bomb-history">
+          <div class="history-title">历史记录</div>
+          <div class="history-list" id="bomb-history-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数字炸弹 - 爆炸页 -->
+    <div id="page-bomb-explode" class="page">
+      <div class="explode-content">
+        <div class="explode-emoji" id="explode-emoji">💥</div>
+        <h2>砰！被炸了！</h2>
+        <p class="explode-desc"><span id="bomb-loser">玩家 3</span> 猜中了炸弹数字 <strong id="bomb-answer">73</strong></p>
+        <div class="explode-stats">
+          <div class="stat-item">
+            <div class="stat-num" id="bomb-guess-count">6</div>
+            <div class="stat-label">本局猜测次数</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
+          <button class="btn-primary" onclick="restartBomb()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 猜词助手 - 设置页 -->
+    <div id="page-wordguess-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">猜词助手</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="setup-content">
+        <div class="setup-section">
+          <h4>游戏模式</h4>
+          <div class="mode-list" id="wg-mode">
+            <div class="mode-card" data-val="verbal">
+              <span class="mode-emoji">🗣️</span>
+              <div class="mode-info">
+                <div class="mode-name">口头描述</div>
+                <div class="mode-desc">用语言描述，不能说出词语本身</div>
+              </div>
+            </div>
+            <div class="mode-card active" data-val="gesture">
+              <span class="mode-emoji">🤸</span>
+              <div class="mode-info">
+                <div class="mode-name">你比我猜</div>
+                <div class="mode-desc">用肢体动作比划，不能说话</div>
+              </div>
+            </div>
+            <div class="mode-card" data-val="draw">
+              <span class="mode-emoji">🎨</span>
+              <div class="mode-info">
+                <div class="mode-name">你画我猜</div>
+                <div class="mode-desc">在纸上画出词语让队友猜</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>词库分类</h4>
+          <div class="chip-group" id="wg-category">
+            <span class="chip active" data-val="all">综合</span>
+            <span class="chip" data-val="food">食物</span>
+            <span class="chip" data-val="star">明星</span>
+            <span class="chip" data-val="daily">日常</span>
+            <span class="chip" data-val="idiom">成语</span>
+            <span class="chip" data-val="animal">动物</span>
+            <span class="chip" data-val="movie">影视</span>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>每轮时长</h4>
+          <div class="chip-group" id="wg-duration">
+            <span class="chip" data-val="30">30秒</span>
+            <span class="chip active" data-val="60">60秒</span>
+            <span class="chip" data-val="90">90秒</span>
+            <span class="chip" data-val="120">120秒</span>
+          </div>
+        </div>
+        <button class="btn-primary btn-full" onclick="startWordGuess()">开始出题</button>
+      </div>
+    </div>
+
+    <!-- 猜词助手 - 出题页 -->
+    <div id="page-wordguess-play" class="page">
+      <div class="wg-play-content">
+        <div class="wg-top-bar">
+          <span class="wg-word-count">第 <span id="wg-word-num">1</span> 个词</span>
+          <span class="wg-timer" id="wg-timer">⏱ 01:00</span>
+        </div>
+        <div class="wg-word-card">
+          <div class="wg-category" id="wg-category-label">综合</div>
+          <div class="wg-word" id="wg-current-word">火锅</div>
+          <div class="wg-mode-tip" id="wg-mode-tip">用肢体动作比划，不能说话</div>
+        </div>
+        <div class="wg-actions">
+          <button class="btn-outline wg-btn" onclick="skipWord()">
+            <span class="btn-icon">⏭</span> 跳过
+          </button>
+          <button class="btn-primary wg-btn" onclick="correctWord()">
+            <span class="btn-icon">✓</span> 猜中了
+          </button>
+        </div>
+        <div class="wg-stats">
+          <div class="wg-stat">
+            <div class="wg-stat-num correct" id="wg-correct">0</div>
+            <div class="wg-stat-label">猜中</div>
+          </div>
+          <div class="wg-stat">
+            <div class="wg-stat-num skip" id="wg-skip">0</div>
+            <div class="wg-stat-label">跳过</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 猜词助手 - 结果页 -->
+    <div id="page-wordguess-result" class="page">
+      <div class="result-content">
+        <div class="result-icon">🎉</div>
+        <h2>时间到！</h2>
+        <div class="wg-score-card">
+          <div class="wg-score-num" id="wg-final-score">5</div>
+          <div class="wg-score-label">个词语猜中</div>
+        </div>
+        <div class="wg-result-stats">
+          <div class="wg-stat-item">
+            <div class="wg-stat-num correct" id="wg-final-correct">5</div>
+            <div class="wg-stat-label">猜中</div>
+          </div>
+          <div class="wg-stat-item">
+            <div class="wg-stat-num skip" id="wg-final-skip">2</div>
+            <div class="wg-stat-label">跳过</div>
+          </div>
+          <div class="wg-stat-item">
+            <div class="wg-stat-num total" id="wg-final-total">7</div>
+            <div class="wg-stat-label">总计</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
+          <button class="btn-primary" onclick="nextGroupWG()">下一组</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 战绩页 -->
+    <div id="page-stats" class="page">
+      <div class="stats-header">
+        <h2>战绩记录</h2>
+      </div>
+      <div class="stats-summary">
+        <div class="summary-card">
+          <div class="summary-num" id="stats-total">0</div>
+          <div class="summary-label">总游戏局数</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-num" id="stats-uc">0</div>
+          <div class="summary-label">谁是卧底</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-num" id="stats-bomb">0</div>
+          <div class="summary-label">数字炸弹</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-num" id="stats-wg">0</div>
+          <div class="summary-label">猜词助手</div>
+        </div>
+      </div>
+      <div class="stats-filter">
+        <span class="filter-chip active" data-filter="all">全部</span>
+        <span class="filter-chip" data-filter="undercover">谁是卧底</span>
+        <span class="filter-chip" data-filter="bomb">数字炸弹</span>
+        <span class="filter-chip" data-filter="wordguess">猜词助手</span>
+      </div>
+      <div class="stats-list" id="stats-list">
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <p>还没有游戏记录</p>
+          <p class="empty-sub">快去玩一局吧！</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置页 -->
+    <div id="page-settings" class="page">
+      <div class="settings-header">
+        <h2>设置</h2>
+      </div>
+      <div class="settings-list">
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-icon">🔊</span>
+            <span class="setting-name">音效</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-sound" checked onchange="saveSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-icon">📳</span>
+            <span class="setting-name">振动反馈</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-vibrate" checked onchange="saveSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-icon">🔆</span>
+            <span class="setting-name">屏幕常亮</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-wakelock" checked onchange="saveSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-icon">⏱️</span>
+            <span class="setting-name">描述倒计时</span>
+          </div>
+          <div class="setting-value">
+            <select id="set-describe-time" onchange="saveSettings()">
+              <option value="15">15秒</option>
+              <option value="30" selected>30秒</option>
+              <option value="45">45秒</option>
+              <option value="60">60秒</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-icon">📚</span>
+            <span class="setting-name">词库信息</span>
+          </div>
+          <span class="setting-value-text" id="set-wordbank-info">500+ 词汇</span>
+        </div>
+        <div class="setting-item danger" onclick="clearStats()">
+          <div class="setting-info">
+            <span class="setting-icon">🗑️</span>
+            <span class="setting-name">清除战绩记录</span>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+      </div>
+      <div class="app-info">
+        <p>派对游戏盒 v1.0</p>
+        <p class="app-info-sub">一款轻量级聚会游戏工具</p>
+      </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+      <div class="nav-item active" data-page="home" onclick="switchTab('home')">
+        <span class="nav-icon">🎮</span>
+        <span class="nav-label">游戏</span>
+      </div>
+      <div class="nav-item" data-page="stats" onclick="switchTab('stats')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">战绩</span>
+      </div>
+      <div class="nav-item" data-page="settings" onclick="switchTab('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">设置</span>
+      </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div id="confirm-modal" class="modal" style="display:none">
+      <div class="modal-content">
+        <h3 id="modal-title">确认</h3>
+        <p id="modal-message">确定要退出吗？当前游戏进度将丢失。</p>
+        <div class="modal-actions">
+          <button class="btn-outline" onclick="closeModal()">取消</button>
+          <button class="btn-primary" id="modal-confirm-btn" onclick="confirmModal()">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div id="toast" class="toast" style="display:none"></div>
+  </div>
+
+  <script src="js/wordbank.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
