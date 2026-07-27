@@ -1829,6 +1829,95 @@ body::after {
   40%, 80% { transform: translateX(8px); }
 }
 
+/* ==================== 确认弹窗 ==================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(45, 27, 14, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  animation: fadeIn 0.2s var(--ease-smooth);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 28px 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(45, 27, 14, 0.25);
+  animation: modalIn 0.35s var(--ease-spring);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-title {
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.modal-message {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.modal-actions .modal-cancel {
+  background: var(--bg2);
+  color: var(--muted);
+  border: none;
+}
+
+.modal-actions .modal-cancel:active {
+  transform: scale(0.95);
+}
+
+.modal-actions .modal-confirm {
+  background: var(--gradient);
+  color: var(--white);
+  border: none;
+  box-shadow: 0 3px 12px rgba(232, 93, 58, 0.3);
+}
+
+.modal-actions .modal-confirm:active {
+  transform: scale(0.95);
+}
+
 /* ==================== 输入框通用 ==================== */
 .input-field {
   width: 100%;
