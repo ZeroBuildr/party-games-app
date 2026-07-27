@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080c14">
+    <meta name="description" content="Gap Ratio 临床计算器 - A型/B型乳酸升高鉴别诊断">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Gap Ratio</title>
+    <style>
+        :root {
+            --bg: #080c14;
+            --bg-elevated: #0d111c;
+            --bg-surface: #111827;
+            --bg-input: #0f1623;
+            --border: #1e293b;
+            --border-subtle: rgba(148, 163, 184, 0.08);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --accent: #0ea5e9;
+            --accent-soft: rgba(14, 165, 233, 0.08);
+            --accent-glow: rgba(14, 165, 233, 0.15);
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.08);
+            --success: #10b981;
+            --success-soft: rgba(16, 185, 129, 0.08);
+            --warning: #f59e0b;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --shadow-ambient: 0 1px 3px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2);
+            --font-display: 'Space Grotesk', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { font-size: 16px; scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-display);
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 15% 20%, rgba(14, 165, 233, 0.04) 0%, transparent 70%),
+                radial-gradient(ellipse 400px 300px at 85% 60%, rgba(16, 185, 129, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.015;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .app {
+            position: relative;
+            z-index: 2;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 20px 24px;
+        }
+
+        /* ===== FLOATING NAV ===== */
+        .nav-island {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            margin: 0 auto 28px;
+            max-width: max-content;
+            background: rgba(13, 17, 28, 0.7);
+            backdrop-filter: blur(20px) saturate(1.4);
+            -webkit-backdrop-filter: blur(20px) saturate(1.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            box-shadow: var(--shadow-ambient);
+            transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .nav-island .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 13px;
+        }
+
+        .nav-island .nav-title {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .nav-island .nav-sub {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            margin-left: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== HERO RESULT ===== */
+        .hero-section {
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(24px);
+            animation: reveal 0.8s cubic-bezier(0.32, 0.72, 0, 1) 0.1s forwards;
+        }
+
+        .bezel-shell {
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 48px -12px rgba(0,0,0,0.4);
+        }
+
+        .bezel-core {
+            background: linear-gradient(160deg, #121a2b 0%, #0d1420 100%);
+            border-radius: calc(var(--radius-xl) - 2px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bezel-core::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.06);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            padding: 32px 28px 28px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(14, 165, 233, 0.12);
+            border-radius: 100px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .hero-eyebrow .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero-value {
+            font-family: var(--font-mono);
+            font-size: 3.6rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .hero-badge.type-a {
+            background: var(--danger-soft);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
+        }
+
+        .hero-badge.type-b {
+            background: var(--success-soft);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.08);
+        }
+
+        .hero-badge.waiting {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            margin-top: 24px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .metric-cell {
+            background: var(--bg-surface);
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.62rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* ===== TYPE DIAGNOSIS CARD ===== */
+        .diagnosis-section {
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .diagnosis-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .diagnosis-card {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .diagnosis-card.type-a-diag {
+            border-color: rgba(239, 68, 68, 0.12);
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.03), transparent);
+        }
+
+        .diagnosis-card.type-b-diag {
+            border-color: rgba(16, 185, 129, 0.12);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.03), transparent);
+        }
+
+        .diag-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        .diag-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .type-a-diag .diag-badge {
+            background: var(--danger-soft);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .type-b-diag .diag-badge {
+            background: var(--success-soft);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+
+        .diag-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .diag-body {
+            padding: 0 20px 20px;
+        }
+
+        .diag-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.78rem;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
+        .diag-row:last-child { margin-bottom: 0; }
+
+        .diag-row-label {
+            flex-shrink: 0;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            min-width: 40px;
+        }
+
+        .diag-footer {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
+
+        .type-a-diag .diag-footer {
+            background: rgba(239, 68, 68, 0.06);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.08);
+        }
+
+        .type-b-diag .diag-footer {
+            background: rgba(16, 185, 129, 0.06);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.08);
+        }
+
+        /* ===== FORMULA SECTION ===== */
+        .formula-section {
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: reveal 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.25s forwards;
+        }
+
+        .formula-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-tertiary);
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .formula-toggle-btn:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+        }
+
+        .formula-toggle-btn:active { transform: scale(0.98); }
+
+        .formula-toggle-btn .chevron {
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            font-size: 0.7rem;
+        }
+
+        .formula-toggle-btn.open .chevron { transform: rotate(180deg); }
+
+        .formula-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.32, 0.72, 0, 1), margin 0.3s;
+        }
+
+        .formula-panel.open {
+            max-height: 300px;
+            margin-top: 12px;
+        }
+
+        .formula-card {
+            padding: 24px 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .formula-frac { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; }
+        .formula-top { font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.02em; }
+        .formula-divider { width: 220px; height: 1.5px; background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.4), transparent); }
+        .formula-bot { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.9; max-width: 320px; }
+        .formula-bot .a { color: #f87171; font-weight: 600; }
+        .formula-bot .v { color: #60a5fa; font-weight: 600; }
+        .formula-bot .n { color: var(--accent); font-family: var(--font-mono); font-weight: 500; }
+
+        /* ===== INPUT SECTIONS ===== */
+        .input-section {
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: reveal 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.35s forwards;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding-left: 4px;
+        }
+
+        .section-header .section-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        .section-header .section-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+
+        .input-card {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .input-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .input-card-header .header-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .input-card-header .header-text {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .card-co2 .input-card-header { background: rgba(16, 185, 129, 0.04); }
+        .card-co2 .header-dot { background: var(--success); box-shadow: 0 0 8px rgba(16, 185, 129, 0.3); }
+        .card-co2 .header-text { color: #34d399; }
+
+        .card-art .input-card-header { background: rgba(239, 68, 68, 0.04); }
+        .card-art .header-dot { background: var(--danger); box-shadow: 0 0 8px rgba(239, 68, 68, 0.25); }
+        .card-art .header-text { color: #f87171; }
+
+        .card-ven .input-card-header { background: rgba(96, 165, 250, 0.04); }
+        .card-ven .header-dot { background: var(--accent); box-shadow: 0 0 8px rgba(14, 165, 233, 0.25); }
+        .card-ven .header-text { color: #60a5fa; }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            min-height: 56px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .input-row:last-child { border-bottom: none; }
+        .input-row:focus-within { background: rgba(255,255,255,0.015); }
+        .input-row.error { background: rgba(239, 68, 68, 0.04); }
+        .input-row.error .input-core { border-color: rgba(239, 68, 68, 0.25); }
+
+        .input-info { flex-shrink: 0; width: 100px; }
+        .input-info .input-name { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); line-height: 1.3; }
+        .input-info .input-unit { font-size: 0.62rem; color: var(--text-tertiary); margin-top: 1px; }
+
+        .input-core {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            text-align: right;
+            width: 100%;
+        }
+
+        .input-core::placeholder { color: var(--text-tertiary); opacity: 0.35; font-weight: 400; }
+        .input-core:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .card-co2 .input-core:focus { border-color: var(--success); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .card-art .input-core:focus { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
+        .card-ven .input-core:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+
+        .co2-row { display: grid; grid-template-columns: 1fr 1fr; }
+        .co2-row .input-row { border-bottom: none; border-right: 1px solid var(--border); padding: 0 14px; }
+        .co2-row .input-row:last-child { border-right: none; }
+        .co2-row .input-info { width: 60px; }
+        .co2-row .input-name { font-size: 0.7rem; }
+        .co2-row .input-core { padding: 9px 11px; font-size: 0.92rem; }
+
+        /* ===== ACTION BAR ===== */
+        .action-bar {
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+            background: linear-gradient(transparent 0%, var(--bg) 40%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            -webkit-user-select: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            flex: 0.45;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+            color: var(--text-primary);
+        }
+
+        .spacer { height: 60px; }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(24px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        @media (min-width: 500px) {
+            .app { padding: 0 28px 32px; }
+            .hero-value { font-size: 4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <div class="app">
+        <div class="nav-island">
+            <div class="nav-icon">&#x1F3E5;</div>
+            <span class="nav-title">Gap Ratio</span>
+            <span class="nav-sub">乳酸鉴别</span>
+        </div>
+
+        <div class="hero-section" id="heroSection">
+            <div class="bezel-shell">
+                <div class="bezel-core">
+                    <div class="hero-content">
+                        <div class="hero-eyebrow">
+                            <span class="dot"></span>
+                            临床计算结果
+                        </div>
+                        <div class="hero-value" id="heroValue">--</div>
+                        <div class="hero-badge waiting" id="heroBadge">
+                            <span class="badge-icon">&#x25CB;</span>
+                            <span id="badgeText">等待输入</span>
+                        </div>
+                        <div class="hero-metrics">
+                            <div class="metric-cell">
+                                <div class="metric-label">分子</div>
+                                <div class="metric-value" id="metricNum">--</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label">分母</div>
+                                <div class="metric-value" id="metricDen">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="diagnosis-section" id="diagnosisSection">
+            <div class="diagnosis-card type-a-diag" id="typeACard" style="display:none">
+                <div class="diag-header">
+                    <div class="diag-badge">A</div>
+                    <div class="diag-title">A型乳酸升高<br><span style="font-size:0.72rem;font-weight:500;color:var(--text-tertiary)">低灌注 / 缺氧型</span></div>
+                </div>
+                <div class="diag-body">
+                    <div class="diag-row">
+                        <span class="diag-row-label">根源</span>
+                        <span>全身组织灌注不足、供氧不够，细胞无氧发酵大量产乳酸</span>
+                    </div>
+                    <div class="diag-row">
+                        <span class="diag-row-label">场景</span>
+                        <span>各类休克、心衰、严重低氧、重度贫血</span>
+                    </div>
+                    <div class="diag-footer">
+                        Gap Ratio &ge; 1.4 &mdash; 无氧代谢占比高，支持低灌注缺氧
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagnosis-card type-b-diag" id="typeBCard" style="display:none">
+                <div class="diag-header">
+                    <div class="diag-badge">B</div>
+                    <div class="diag-title">B型乳酸升高<br><span style="font-size:0.72rem;font-weight:500;color:var(--text-tertiary)">无全身低灌注</span></div>
+                </div>
+                <div class="diag-body">
+                    <div class="diag-row">
+                        <span class="diag-row-label">根源</span>
+                        <span>非灌注因素：代谢、药物、线粒体、肝脏清除下降导致乳酸蓄积</span>
+                    </div>
+                    <div class="diag-row">
+                        <span class="diag-row-label">场景</span>
+                        <span>二甲双胍、肾上腺素、肝病、肿瘤、剧烈运动、癫痫</span>
+                    </div>
+                    <div class="diag-footer">
+                        Gap Ratio &lt; 1.4 &mdash; 无明显全身无氧代谢增多，找非灌注类病因
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="formula-section">
+            <div class="section-header">
+                <span class="section-title">计算公式</span>
+                <span class="section-line"></span>
+            </div>
+            <button class="formula-toggle-btn" id="formulaToggle" onclick="toggleFormula()">
+                <span>展开公式</span>
+                <span class="chevron">&#9660;</span>
+            </button>
+            <div class="formula-panel" id="formulaPanel">
+                <div class="formula-card">
+                    <div class="formula-frac">
+                        <div class="formula-top">PvCO<sub>2</sub> &minus; PaCO<sub>2</sub></div>
+                        <div class="formula-divider"></div>
+                        <div class="formula-bot">
+                            [<span class="a">Hb<sub>a</sub> &times; SaO<sub>2</sub> &times; <span class="n">1.34</span> + PaO<sub>2</sub> &times; <span class="n">0.0031</span></span>]
+                            &minus;
+                            [<span class="v">Hb<sub>v</sub> &times; SvO<sub>2</sub> &times; <span class="n">1.34</span> + PvO<sub>2</sub> &times; <span class="n">0.0031</span></span>]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="section-header">
+                <span class="section-title">CO<sub>2</sub> 分压</span>
+                <span class="section-line"></span>
+            </div>
+            <div class="input-card card-co2">
+                <div class="input-card-header">
+                    <span class="header-dot"></span>
+                    <span class="header-text">CO<sub>2</sub> 分压差值</span>
+                </div>
+                <div class="co2-row">
+                    <div class="input-row" id="f-pvco2">
+                        <div class="input-info">
+                            <div class="input-name">PvCO<sub>2</sub></div>
+                            <div class="input-unit">混合静脉 mmHg</div>
+                        </div>
+                        <input type="number" class="input-core" id="pvco2" placeholder="46" inputmode="decimal">
+                    </div>
+                    <div class="input-row" id="f-paco2">
+                        <div class="input-info">
+                            <div class="input-name">PaCO<sub>2</sub></div>
+                            <div class="input-unit">动脉 mmHg</div>
+                        </div>
+                        <input type="number" class="input-core" id="paco2" placeholder="40" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="section-header">
+                <span class="section-title">动脉血参数</span>
+                <span class="section-line"></span>
+            </div>
+            <div class="input-card card-art">
+                <div class="input-card-header">
+                    <span class="header-dot"></span>
+                    <span class="header-text">动脉血气</span>
+                </div>
+                <div class="input-row" id="f-arterial-hb">
+                    <div class="input-info">
+                        <div class="input-name">Hb</div>
+                        <div class="input-unit">血色素 g/dL</div>
+                    </div>
+                    <input type="number" class="input-core" id="arterial-hb" placeholder="14" inputmode="decimal">
+                </div>
+                <div class="input-row" id="f-arterial-sat">
+                    <div class="input-info">
+                        <div class="input-name">SaO<sub>2</sub></div>
+                        <div class="input-unit">饱和度 %</div>
+                    </div>
+                    <input type="number" class="input-core" id="arterial-sat" placeholder="95" inputmode="decimal" min="0" max="100">
+                </div>
+                <div class="input-row" id="f-arterial-po2">
+                    <div class="input-info">
+                        <div class="input-name">PaO<sub>2</sub></div>
+                        <div class="input-unit">氧分压 mmHg</div>
+                    </div>
+                    <input type="number" class="input-core" id="arterial-po2" placeholder="90" inputmode="decimal">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="section-header">
+                <span class="section-title">静脉血参数</span>
+                <span class="section-line"></span>
+            </div>
+            <div class="input-card card-ven">
+                <div class="input-card-header">
+                    <span class="header-dot"></span>
+                    <span class="header-text">静脉血气</span>
+                </div>
+                <div class="input-row" id="f-venous-hb">
+                    <div class="input-info">
+                        <div class="input-name">Hb</div>
+                        <div class="input-unit">血色素 g/dL</div>
+                    </div>
+                    <input type="number" class="input-core" id="venous-hb" placeholder="14" inputmode="decimal">
+                </div>
+                <div class="input-row" id="f-venous-sat">
+                    <div class="input-info">
+                        <div class="input-name">SvO<sub>2</sub></div>
+                        <div class="input-unit">饱和度 %</div>
+                    </div>
+                    <input type="number" class="input-core" id="venous-sat" placeholder="70" inputmode="decimal" min="0" max="100">
+                </div>
+                <div class="input-row" id="f-venous-po2">
+                    <div class="input-info">
+                        <div class="input-name">PvO<sub>2</sub></div>
+                        <div class="input-unit">氧分压 mmHg</div>
+                    </div>
+                    <input type="number" class="input-core" id="venous-po2" placeholder="40" inputmode="decimal">
+                </div>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn btn-primary" onclick="calculate()">
+            <span>&#x25B6;</span> 计算
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+            重置
+        </button>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => {})
+                    .catch(() => {});
+            });
+        }
+
+        function toggleFormula() {
+            const btn = document.getElementById('formulaToggle');
+            const panel = document.getElementById('formulaPanel');
+            const isOpen = panel.classList.toggle('open');
+            btn.classList.toggle('open', isOpen);
+            btn.querySelector('span').textContent = isOpen ? '收起公式' : '展开公式';
+        }
+
+        const inputIds = ['pvco2', 'paco2', 'arterial-hb', 'arterial-sat', 'arterial-po2', 'venous-hb', 'venous-sat', 'venous-po2'];
+        let timer;
+        inputIds.forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                clearTimeout(timer);
+                const f = document.getElementById('f-' + id);
+                if (f) f.classList.remove('error');
+                timer = setTimeout(() => { if (allFilled()) calculate(); }, 400);
+            });
+        });
+
+        function allFilled() {
+            return inputIds.every(id => {
+                const v = document.getElementById(id).value.trim();
+                return v !== '' && !isNaN(parseFloat(v));
+            });
+        }
+
+        function getVal(id) {
+            const el = document.getElementById(id);
+            const v = el.value.trim();
+            if (v === '' || isNaN(parseFloat(v))) return null;
+            return parseFloat(v);
+        }
+
+        function calculate() {
+            document.querySelectorAll('.input-row').forEach(r => r.classList.remove('error'));
+
+            const pvco2 = getVal('pvco2');
+            const paco2 = getVal('paco2');
+            const aHb = getVal('arterial-hb');
+            const aSat = getVal('arterial-sat');
+            const aPO2 = getVal('arterial-po2');
+            const vHb = getVal('venous-hb');
+            const vSat = getVal('venous-sat');
+            const vPO2 = getVal('venous-po2');
+
+            let hasError = false;
+            const checks = [
+                ['pvco2', pvco2], ['paco2', paco2],
+                ['arterial-hb', aHb], ['arterial-sat', aSat], ['arterial-po2', aPO2],
+                ['venous-hb', vHb], ['venous-sat', vSat], ['venous-po2', vPO2]
+            ];
+            checks.forEach(([id, val]) => {
+                if (val === null) {
+                    document.getElementById('f-' + id).classList.add('error');
+                    hasError = true;
+                }
+            });
+            if (hasError) { setResult(null, null, '请填写所有参数', 'waiting'); return; }
+
+            if (aSat < 0 || aSat > 100) { document.getElementById('f-arterial-sat').classList.add('error'); setResult(null, null, '饱和度须 0-100', 'waiting'); return; }
+            if (vSat < 0 || vSat > 100) { document.getElementById('f-venous-sat').classList.add('error'); setResult(null, null, '饱和度须 0-100', 'waiting'); return; }
+
+            const aSatD = aSat / 100;
+            const vSatD = vSat / 100;
+            const caO2 = (aHb * aSatD * 1.34) + (aPO2 * 0.0031);
+            const cvO2 = (vHb * vSatD * 1.34) + (vPO2 * 0.0031);
+
+            const numerator = pvco2 - paco2;
+            const denominator = caO2 - cvO2;
+
+            if (Math.abs(denominator) < 0.0001) { setResult(numerator, denominator, '分母为零', 'waiting'); return; }
+
+            const result = numerator / denominator;
+            const isTypeA = result >= 1.4;
+            const tag = isTypeA ? 'A型 - 低灌注/缺氧' : 'B型 - 非低灌注因素';
+            const type = isTypeA ? 'type-a' : 'type-b';
+
+            setResult(numerator, denominator, tag, type, result);
+        }
+
+        function setResult(num, den, tagText, tagType, result) {
+            const heroValue = document.getElementById('heroValue');
+            const heroBadge = document.getElementById('heroBadge');
+            const badgeText = document.getElementById('badgeText');
+            const metricNum = document.getElementById('metricNum');
+            const metricDen = document.getElementById('metricDen');
+            const diagSection = document.getElementById('diagnosisSection');
+            const typeACard = document.getElementById('typeACard');
+            const typeBCard = document.getElementById('typeBCard');
+
+            metricNum.textContent = num !== null ? num.toFixed(3) : '--';
+            metricDen.textContent = den !== null ? den.toFixed(3) : '--';
+
+            heroBadge.className = 'hero-badge';
+            typeACard.style.display = 'none';
+            typeBCard.style.display = 'none';
+            diagSection.classList.remove('visible');
+
+            if (result !== undefined && result !== null) {
+                heroValue.textContent = result.toFixed(4);
+                heroBadge.classList.add(tagType);
+                badgeText.textContent = tagText;
+
+                const targetCard = result >= 1.4 ? typeACard : typeBCard;
+                targetCard.style.display = 'block';
+                setTimeout(() => diagSection.classList.add('visible'), 50);
+            } else {
+                heroValue.textContent = '--';
+                heroBadge.classList.add('waiting');
+                badgeText.textContent = tagText;
+            }
+        }
+
+        function clearAll() {
+            inputIds.forEach(id => {
+                document.getElementById(id).value = '';
+                document.getElementById('f-' + id).classList.remove('error');
+            });
+            setResult(null, null, '等待输入', 'waiting');
+        }
+    </script>
+</body>
+</html>
