@@ -653,6 +653,12 @@ function updateWGPlayPage() {
     nature: '自然',
     job: '职业',
     music: '音乐',
+    history: '历史',
+    science: '科学',
+    comedy: '喜剧',
+    character: '角色',
+    brand: '品牌',
+    game: '游戏',
   };
   const catLabel = document.getElementById('wg-category-label');
   if (catLabel) catLabel.textContent = categoryNames[wg.category] || '综合';
