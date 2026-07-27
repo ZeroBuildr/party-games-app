@@ -114,6 +114,7 @@
         </div>
         <p class="deal-tip">查看完毕后点击下方按钮，将手机传给下一位玩家</p>
         <button class="btn-primary btn-full" id="uc-next-btn" onclick="nextPlayer()" style="opacity:0.5;pointer-events:none">我记住了，传给下一位</button>
+        <button class="btn-danger btn-full btn-end" onclick="endUndercoverGame()">结束游戏</button>
         <div class="progress-dots">
           <div id="uc-dots"></div>
           <p class="dots-label"><span id="uc-viewed-count">0</span> / <span id="uc-total-count">4</span> 已查看</p>
@@ -159,6 +160,7 @@
         <p class="vote-tip">选出你认为是卧底的玩家</p>
         <div class="player-list" id="uc-vote-list"></div>
         <button class="btn-primary btn-full" onclick="submitVote()" id="uc-submit-vote" style="opacity:0.5;pointer-events:none">确认投票</button>
+        <button class="btn-danger btn-full btn-end" onclick="endUndercoverGame()">结束游戏</button>
       </div>
     </div>
 
@@ -262,6 +264,7 @@
           <div class="history-title">历史记录</div>
           <div class="history-list" id="bomb-history-list"></div>
         </div>
+        <button class="btn-danger btn-full btn-end" onclick="endBombGame()">结束游戏</button>
       </div>
     </div>
 
@@ -343,6 +346,7 @@
             <span class="chip active" data-val="60">60秒</span>
             <span class="chip" data-val="90">90秒</span>
             <span class="chip" data-val="120">120秒</span>
+            <span class="chip" data-val="0">不限时</span>
           </div>
         </div>
         <button class="btn-primary btn-full" onclick="startSingleWordGuess()">开始出题</button>
@@ -351,6 +355,11 @@
 
     <!-- 单机模式 - 猜词助手出题页 -->
     <div id="page-wordguess-play" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="endWordGuessGame()">‹</span>
+        <span class="page-title">猜词中</span>
+        <span style="width:24px"></span>
+      </div>
       <div class="wg-play-content">
         <div class="wg-top-bar">
           <span class="wg-word-count">第 <span id="wg-word-num">1</span> 个词</span>
@@ -379,6 +388,7 @@
             <div class="wg-stat-label">跳过</div>
           </div>
         </div>
+        <button class="btn-danger btn-full btn-end" onclick="endWordGuessGame()">结束本轮</button>
       </div>
     </div>
 

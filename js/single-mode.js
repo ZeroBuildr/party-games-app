@@ -189,8 +189,11 @@ function nextPlayer() {
 }
 
 function confirmExitUC() {
-  showModal('确认退出', '确定要退出吗？当前游戏进度将丢失。', () => {
-    if (uc.describeTimer) clearInterval(uc.describeTimer);
+  showConfirmModal('确认退出', '确定要退出吗？当前游戏进度将丢失。', () => {
+    if (uc.describeTimer) {
+      clearInterval(uc.describeTimer);
+      uc.describeTimer = null;
+    }
     navTo('undercover-setup');
   });
 }
@@ -539,8 +542,20 @@ function showBombExplode() {
 }
 
 function confirmExitBomb() {
-  showModal('确认退出', '确定要退出吗？当前游戏进度将丢失。', () => {
+  showConfirmModal('确认退出', '确定要退出吗？当前游戏进度将丢失。', () => {
     navTo('bomb-setup');
+  });
+}
+
+function endBombGame() {
+  showConfirmModal('结束游戏', '确定要结束当前游戏吗？当前进度将丢失。', () => {
+    saveStat('bomb', {
+      result: '中途结束',
+      players: bomb.playerCount,
+      guessCount: bomb.guessCount,
+      bombNum: bomb.bombNum,
+    });
+    navTo('home');
   });
 }
 
@@ -560,10 +575,56 @@ function startSingleWordGuess() {
   wg.skip = 0;
   wg.usedWords = [];
   wg.timeLeft = wg.duration;
-  
+
   updateWGPlayPage();
   navTo('wordguess-play');
   startWGTimer();
+}
+
+function startWGTimer() {
+  if (wg.timer) {
+    clearInterval(wg.timer);
+    wg.timer = null;
+  }
+
+  // 不限时模式：不启动计时器
+  if (wg.duration === 0) {
+    return;
+  }
+
+  wg.timer = setInterval(() => {
+    wg.timeLeft--;
+    updateWGTimerDisplay();
+
+    if (wg.timeLeft <= 0) {
+      clearInterval(wg.timer);
+      wg.timer = null;
+      vibrate([100, 50, 100]);
+      showWGResult();
+    }
+  }, 1000);
+}
+
+function updateWGTimerDisplay() {
+  const timerEl = document.getElementById('wg-timer');
+  if (!timerEl) return;
+
+  // 不限时模式
+  if (wg.duration === 0) {
+    timerEl.textContent = '⏱ ∞';
+    timerEl.classList.remove('warning');
+    return;
+  }
+
+  const minutes = Math.floor(wg.timeLeft / 60);
+  const seconds = wg.timeLeft % 60;
+  timerEl.textContent = `⏱ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  if (wg.timeLeft <= 10) {
+    timerEl.classList.add('warning');
+  } else {
+    timerEl.classList.remove('warning');
+  }
 }
 
 function updateWGPlayPage() {
@@ -598,39 +659,8 @@ function updateWGPlayPage() {
   
   document.getElementById('wg-correct').textContent = wg.correct;
   document.getElementById('wg-skip').textContent = wg.skip;
-  
+
   updateWGTimerDisplay();
-}
-
-function startWGTimer() {
-  if (wg.timer) {
-    clearInterval(wg.timer);
-  }
-  
-  wg.timer = setInterval(() => {
-    wg.timeLeft--;
-    updateWGTimerDisplay();
-    
-    if (wg.timeLeft <= 0) {
-      clearInterval(wg.timer);
-      vibrate([100, 50, 100]);
-      showWGResult();
-    }
-  }, 1000);
-}
-
-function updateWGTimerDisplay() {
-  const timerEl = document.getElementById('wg-timer');
-  if (!timerEl) return;
-  const minutes = Math.floor(wg.timeLeft / 60);
-  const seconds = wg.timeLeft % 60;
-  timerEl.textContent = `⏱ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  
-  if (wg.timeLeft <= 10) {
-    timerEl.classList.add('warning');
-  } else {
-    timerEl.classList.remove('warning');
-  }
 }
 
 function correctWord() {
@@ -648,29 +678,41 @@ function skipWord() {
 function nextWGWord() {
   wg.usedWords.push(wg.words[wg.currentWordIndex]);
   wg.currentWordIndex++;
-  
+
   if (wg.currentWordIndex >= wg.words.length) {
     if (wg.timer) {
       clearInterval(wg.timer);
+      wg.timer = null;
     }
     showWGResult();
     showToast('词库已全部出完！');
     return;
   }
-  
+
   updateWGPlayPage();
+}
+
+function endWordGuessGame() {
+  showConfirmModal('结束本轮', '确定要结束本轮猜词吗？将查看本轮成绩。', () => {
+    if (wg.timer) {
+      clearInterval(wg.timer);
+      wg.timer = null;
+    }
+    showWGResult();
+  });
 }
 
 function showWGResult() {
   if (wg.timer) {
     clearInterval(wg.timer);
+    wg.timer = null;
   }
-  
+
   document.getElementById('wg-final-score').textContent = wg.correct;
   document.getElementById('wg-final-correct').textContent = wg.correct;
   document.getElementById('wg-final-skip').textContent = wg.skip;
   document.getElementById('wg-final-total').textContent = wg.correct + wg.skip;
-  
+
   saveStat('wordguess', {
     result: `猜中${wg.correct}个`,
     mode: wg.mode,
@@ -678,7 +720,7 @@ function showWGResult() {
     skip: wg.skip,
     duration: wg.duration,
   });
-  
+
   navTo('wordguess-result');
 }
 
