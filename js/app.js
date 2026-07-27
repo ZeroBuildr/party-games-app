@@ -377,12 +377,6 @@ function init() {
       }
     }
   });
-  
-  if (typeof checkAutoJoin === 'function') {
-    setTimeout(() => {
-      checkAutoJoin();
-    }, 500);
-  }
 }
 
 function updateWordbankInfo() {
