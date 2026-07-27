@@ -1,28 +1,24 @@
-// Firebase 配置 - 请将下面的配置替换为你自己的 Firebase 项目配置
-// 如何获取：访问 https://console.firebase.google.com/ → 创建项目 → 项目设置 → 添加Web应用 → 复制配置
+// LeanCloud 配置 - 请将下面的配置替换为你自己的 LeanCloud 应用配置
+// 如何获取：访问 https://console.leancloud.cn/ → 创建应用 → 应用设置 → 获取 AppID 和 AppKey
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+const leancloudConfig = {
+  appId: "YOUR_APP_ID",
+  appKey: "YOUR_APP_KEY",
+  serverURL: "https://YOUR_APP_ID.api.lncldglobal.com"
 };
 
-// 检查是否已配置Firebase
-let firebaseAvailable = false;
+// 检查是否已配置 LeanCloud
+let leancloudAvailable = false;
 
 try {
-  if (firebaseConfig.apiKey !== "YOUR_API_KEY" && typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-    firebaseAvailable = true;
-    console.log('Firebase 初始化成功');
+  if (leancloudConfig.appId !== "YOUR_APP_ID" && typeof AV !== 'undefined') {
+    AV.init(leancloudConfig);
+    leancloudAvailable = true;
+    console.log('LeanCloud 初始化成功');
   } else {
-    console.log('Firebase 未配置，将使用单机模式');
+    console.log('LeanCloud 未配置，将使用单机模式');
   }
 } catch (e) {
-  console.log('Firebase 初始化失败:', e);
-  firebaseAvailable = false;
+  console.log('LeanCloud 初始化失败:', e);
+  leancloudAvailable = false;
 }

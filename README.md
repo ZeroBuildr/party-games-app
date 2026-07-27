@@ -2,110 +2,70 @@
 
 一个支持多人实时联机的聚会小游戏集合，包含谁是卧底、数字炸弹、猜词助手三款游戏。
 
-## ✨ 功能特性
+## 功能特性
 
-### 🎮 三款游戏
-- **🕵️ 谁是卧底** - 隐藏身份，互飙演技，支持3-10人联机
-- **💣 数字炸弹** - 紧张刺激，轮流猜数字，猜中就炸
-- **🤔 猜词助手** - 你比我猜/口头描述/你画我猜，海量词库
+### 三款游戏
+- **谁是卧底** - 隐藏身份，互飙演技，支持3-10人联机
+- **数字炸弹** - 紧张刺激，轮流猜数字，猜中就炸
+- **猜词助手** - 你比我猜/口头描述/你画我猜，海量词库
 
-### 🌐 多人联机
+### 多人联机
 - 一键创建房间，生成分享链接
 - 朋友点击链接直接加入同一房间
 - 实时同步游戏状态，所有人同步游戏进度
 - 房主权限控制，开始游戏、设置参数
 
-### 📱 完美适配
+### 完美适配
 - 移动端优先设计，适配各种手机屏幕
 - 支持振动反馈、屏幕常亮
 - 流畅的动画和交互体验
 
-### 💾 其他功能
+### 其他功能
 - 战绩记录（本地存储）
 - 单机模式（无网络也能玩）
 - 7大词库分类，500+词汇
 - 自定义游戏设置
 
-## 🚀 快速部署
+## 快速部署
 
-### 第一步：创建 Firebase 项目
+### 第一步：创建 LeanCloud 应用
 
-多人联机功能需要 Firebase Realtime Database 支持。
+多人联机功能需要 LeanCloud 数据存储支持。
 
-1. 访问 [Firebase 控制台](https://console.firebase.google.com/)
-2. 点击"添加项目"，输入项目名称（如 `party-games`）
-3. 关闭"启用 Google Analytics"，点击"创建项目"
-4. 项目创建完成后，点击"继续"
+1. 访问 [LeanCloud 控制台](https://console.leancloud.cn/)
+2. 注册账号并登录
+3. 点击"创建应用"，输入应用名称（如 `party-games`）
+4. 选择"开发版"（免费额度足够使用）
 
-### 第二步：启用 Realtime Database
+### 第二步：获取 LeanCloud 配置
 
-1. 在左侧菜单选择"构建" → "Realtime Database"
-2. 点击"创建数据库"
-3. 选择位置（建议选新加坡或日本，离中国近速度快）
-4. 安全规则选择"以测试模式启动"（后续可以修改）
-5. 点击"启用"
+1. 进入应用 → "应用设置" → "应用凭证"
+2. 找到 `AppID`、`AppKey` 和 `服务器地址`
+3. 记录这些信息
 
-### 第三步：获取 Firebase 配置
-
-1. 点击项目概览页的 "</> Web" 图标（添加 Web 应用）
-2. 输入应用昵称（如 `Party Games`），不需要勾选 Firebase Hosting
-3. 点击"注册应用"
-4. 复制 `firebaseConfig` 对象的内容，类似这样：
-
-```javascript
-const firebaseConfig = {
-  apiKey: "xxxxxxxxxx",
-  authDomain: "your-project.firebaseapp.com",
-  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-  projectId: "your-project",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:xxxxxxxxxx"
-};
-```
-
-### 第四步：配置项目
+### 第三步：配置项目
 
 打开 `js/firebase-config.js` 文件，将上面的配置替换进去：
 
 ```javascript
-const firebaseConfig = {
-  apiKey: "你的apiKey",
-  authDomain: "你的项目.firebaseapp.com",
-  databaseURL: "https://你的项目-default-rtdb.firebaseio.com",
-  projectId: "你的项目",
-  storageBucket: "你的项目.appspot.com",
-  messagingSenderId: "你的发送者ID",
-  appId: "你的应用ID"
+const leancloudConfig = {
+  appId: "你的AppID",
+  appKey: "你的AppKey",
+  serverURL: "https://你的AppID.api.lncldglobal.com"
 };
 ```
 
-### 第五步：设置数据库安全规则
+### 第四步：创建数据表
 
-为了防止滥用，建议设置合理的安全规则。在 Firebase 控制台的 Realtime Database → 规则中，替换为：
+在 LeanCloud 控制台中：
 
-```json
-{
-  "rules": {
-    "rooms": {
-      ".read": true,
-      ".write": true,
-      "$roomId": {
-        ".validate": "newData.hasChildren(['gameType', 'hostId', 'players'])",
-        "players": {
-          "$playerId": {
-            ".validate": "newData.hasChildren(['id', 'nickname'])"
-          }
-        }
-      }
-    }
-  }
-}
-```
+1. 进入应用 → "数据存储" → "结构化数据"
+2. 点击"创建 Class"，Class 名称填写 `GameRoom`
+3. 点击"创建"（无需添加任何字段，字段会在运行时自动创建）
 
-点击"发布"保存规则。
+> 注意：数据表的权限需要设置为"所有用户可读可写"，或创建自定义角色。在开发阶段可以在控制台中直接设置 Class 的权限为公开读写。
 
-### 第六步：部署到 GitHub Pages
+### 第五步：部署到 GitHub Pages
 
 1. 在 GitHub 上创建一个新仓库（Public 公开仓库）
 2. 将本项目代码推送到仓库
@@ -115,15 +75,17 @@ const firebaseConfig = {
 6. 点击 Save
 7. 等待 1-2 分钟，页面会显示你的网站地址
 
-### 第七步：开始使用！
+也可以部署到任何静态网站托管服务（Vercel、Netlify、Cloudflare Pages 等）。
 
-1. 访问你的 GitHub Pages 地址
+### 第六步：开始使用！
+
+1. 访问你的网站地址
 2. 点击"创建房间"，选择游戏类型，输入昵称
 3. 点击"复制分享链接"，将链接发给朋友
 4. 朋友点击链接，输入昵称，即可加入同一房间
 5. 人齐后房主点击"开始游戏"，就可以一起玩啦！
 
-## 🎯 使用说明
+## 使用说明
 
 ### 创建房间
 1. 打开首页，点击"创建房间"
@@ -161,7 +123,7 @@ const firebaseConfig = {
 4. 猜对了点"猜中了"，不会点"跳过"
 5. 时间结束后统计成绩
 
-## 📁 项目结构
+## 项目结构
 
 ```
 party-games-app/
@@ -169,45 +131,54 @@ party-games-app/
 ├── css/
 │   └── style.css           # 样式文件
 └── js/
-    ├── firebase-config.js  # Firebase 配置（需要自己填）
+    ├── firebase-config.js  # LeanCloud 配置（需要自己填）
     ├── wordbank.js         # 词库数据
-    ├── multiplayer.js      # 多人联机逻辑
+    ├── multiplayer.js      # 多人联机逻辑（基于 LeanCloud）
     ├── single-mode.js      # 单机模式逻辑
     └── app.js              # 主应用逻辑
 ```
 
-## 🎨 技术栈
+## 技术栈
 
 - 纯前端 HTML/CSS/JavaScript，无需后端服务器
-- Firebase Realtime Database 实现实时数据同步
+- LeanCloud Object Storage + LiveQuery 实现实时数据同步
 - 响应式设计，适配各种移动设备
 - 支持 PWA 相关特性（屏幕常亮等）
 
-## 💡 常见问题
+## 常见问题
 
-**Q: Firebase 免费吗？**
-A: Firebase 有免费额度，对于小规模聚会游戏完全够用。具体额度请参考 Firebase 官网。
+**Q: LeanCloud 免费吗？**
+A: LeanCloud 开发版有免费额度，对于小规模聚会游戏完全够用。具体额度请参考 LeanCloud 官网。
 
 **Q: 最多支持多少人同时游戏？**
 A: 建议每房间不超过 10 人，体验最佳。
 
-**Q: 没有配置 Firebase 能用吗？**
+**Q: 没有配置 LeanCloud 能用吗？**
 A: 可以使用单机模式，所有游戏都能玩，只是需要传手机轮流操作。
 
 **Q: 房间会保存多久？**
-A: 房间数据会保留在数据库中。如果需要自动清理，可以设置 Firebase 云函数定期清理。
+A: 房间数据会保留在 LeanCloud 数据库中。当房间内所有玩家离开时，房间数据会自动销毁。
 
 **Q: 能自定义词库吗？**
 A: 可以，直接修改 `js/wordbank.js` 文件中的词汇即可。
 
-## 📝 更新日志
+**Q: 为什么使用 LeanCloud 而不是 Firebase？**
+A: Firebase 在中国大陆访问不稳定或被屏蔽，LeanCloud 是国内服务，访问速度更快更稳定。
+
+## 更新日志
+
+### v2.1.0
+- 数据存储从 Firebase 迁移到 LeanCloud，国内访问更稳定
+- 新增 AV.LiveQuery 实现实时数据同步
+- 房主退出时自动转移房主权限
+- 优化多字段并发更新逻辑
 
 ### v2.0.0
-- 🎉 新增多人联机模式，支持实时同步
-- 🏠 房间系统，创建/加入/分享链接
-- 👥 玩家列表，房主权限管理
-- 📱 优化移动端体验
-- 🔧 保留单机模式，无网络也能玩
+- 新增多人联机模式，支持实时同步
+- 房间系统，创建/加入/分享链接
+- 玩家列表，房主权限管理
+- 优化移动端体验
+- 保留单机模式，无网络也能玩
 
 ### v1.0.0
 - 初始版本

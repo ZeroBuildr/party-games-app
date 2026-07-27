@@ -1,4 +1,4 @@
-// 多人联机模式 - 基于 Firebase Realtime Database
+// 多人联机模式 - 基于 LeanCloud Object Storage + LiveQuery
 
 const room = {
   id: null,
@@ -9,8 +9,10 @@ const room = {
   players: [],
   gameState: 'lobby', // lobby, playing, result
   data: {},
-  dbRef: null,
+  dbRef: null,       // AV.Object 引用 (GameRoom)
+  liveQuery: null,   // AV.LiveQuery 实例
   listener: null,
+  settings: {},
 };
 
 let selectedGameType = 'undercover';
@@ -18,8 +20,8 @@ let selectedGameType = 'undercover';
 // ==================== 房间系统 ====================
 
 function showCreateRoom() {
-  if (!firebaseAvailable) {
-    showModal('firebase-setup-modal');
+  if (!leancloudAvailable) {
+    showModal('leancloud-setup-modal');
     return;
   }
   selectedGameType = 'undercover';
@@ -27,8 +29,8 @@ function showCreateRoom() {
 }
 
 function showJoinRoom() {
-  if (!firebaseAvailable) {
-    showModal('firebase-setup-modal');
+  if (!leancloudAvailable) {
+    showModal('leancloud-setup-modal');
     return;
   }
   
@@ -74,44 +76,39 @@ function createRoom() {
   const roomId = generateRoomId();
   const playerId = Date.now() + '';
   
-  const db = firebase.database();
-  const roomRef = db.ref('rooms/' + roomId);
-  
   const gameNames = {
     undercover: '谁是卧底',
     bomb: '数字炸弹',
     wordguess: '猜词助手',
   };
   
-  const roomData = {
-    id: roomId,
-    gameType: selectedGameType,
-    hostId: playerId,
-    createdAt: Date.now(),
-    gameState: 'lobby',
-    settings: {
-      category: 'all',
-      duration: 60,
-      mode: 'gesture',
-    },
-    players: {
-      [playerId]: {
-        id: playerId,
-        nickname: nickname,
-        isHost: true,
-        joinedAt: Date.now(),
-      }
-    },
-    gameData: {},
-  };
+  const roomObj = new AV.Object('GameRoom');
+  roomObj.set('roomId', roomId);
+  roomObj.set('gameType', selectedGameType);
+  roomObj.set('hostId', playerId);
+  roomObj.set('gameState', 'lobby');
+  roomObj.set('settings', {
+    category: 'all',
+    duration: 60,
+    mode: 'gesture',
+  });
+  roomObj.set('players', {
+    [playerId]: {
+      id: playerId,
+      nickname: nickname,
+      isHost: true,
+      joinedAt: Date.now(),
+    }
+  });
+  roomObj.set('gameData', {});
   
-  roomRef.set(roomData).then(() => {
+  roomObj.save().then((savedObj) => {
     room.id = roomId;
     room.gameType = selectedGameType;
     room.isHost = true;
     room.myPlayerId = playerId;
     room.myNickname = nickname;
-    room.dbRef = roomRef;
+    room.dbRef = savedObj;
     
     closeModal('create-room-modal');
     listenToRoom();
@@ -138,22 +135,22 @@ function joinRoom() {
     return;
   }
   
-  const db = firebase.database();
-  const roomRef = db.ref('rooms/' + roomId);
-  
-  roomRef.once('value').then(snapshot => {
-    if (!snapshot.exists()) {
+  const query = new AV.Query('GameRoom');
+  query.equalTo('roomId', roomId);
+  query.first().then((existingObj) => {
+    if (!existingObj) {
       showToast('房间不存在');
       return;
     }
     
-    const roomData = snapshot.val();
-    if (roomData.gameState !== 'lobby') {
+    const gameState = existingObj.get('gameState');
+    if (gameState !== 'lobby') {
       showToast('游戏已开始，无法加入');
       return;
     }
     
-    const playerCount = Object.keys(roomData.players || {}).length;
+    const players = existingObj.get('players') || {};
+    const playerCount = Object.keys(players).length;
     if (playerCount >= 10) {
       showToast('房间人数已满');
       return;
@@ -161,18 +158,21 @@ function joinRoom() {
     
     const playerId = Date.now() + '';
     
-    roomRef.child('players/' + playerId).set({
+    players[playerId] = {
       id: playerId,
       nickname: nickname,
       isHost: false,
       joinedAt: Date.now(),
-    }).then(() => {
+    };
+    
+    existingObj.set('players', players);
+    existingObj.save().then((savedObj) => {
       room.id = roomId;
-      room.gameType = roomData.gameType;
+      room.gameType = savedObj.get('gameType');
       room.isHost = false;
       room.myPlayerId = playerId;
       room.myNickname = nickname;
-      room.dbRef = roomRef;
+      room.dbRef = savedObj;
       
       closeModal('join-room-modal');
       listenToRoom();
@@ -188,31 +188,61 @@ function joinRoom() {
 }
 
 function listenToRoom() {
-  if (room.listener) {
-    room.dbRef.off('value', room.listener);
+  // 先取消旧的 LiveQuery 订阅
+  if (room.liveQuery) {
+    try {
+      room.liveQuery.unsubscribe();
+    } catch (e) {
+      console.log('取消旧订阅失败:', e);
+    }
+    room.liveQuery = null;
   }
   
-  room.listener = (snapshot) => {
-    if (!snapshot.exists()) {
-      showToast('房间已解散');
-      leaveRoom();
-      return;
-    }
+  if (!room.dbRef || !room.dbRef.id) return;
+  
+  // 使用 objectId 创建 LiveQuery
+  const query = new AV.Query('GameRoom');
+  query.equalTo('objectId', room.dbRef.id);
+  
+  const liveQuery = AV.LiveQuery.init(query);
+  room.liveQuery = liveQuery;
+  
+  liveQuery.on('create', (newObj) => {
+    // 对象创建（正常情况下不会走到这里，因为房间已经存在）
+    console.log('LiveQuery: create event');
+  });
+  
+  liveQuery.on('update', (updatedObj) => {
+    const gameState = updatedObj.get('gameState');
+    const players = updatedObj.get('players');
+    const gameData = updatedObj.get('gameData');
+    const settings = updatedObj.get('settings');
     
-    const data = snapshot.val();
-    room.gameType = data.gameType;
-    room.gameState = data.gameState;
-    room.players = Object.values(data.players || {}).sort((a, b) => a.joinedAt - b.joinedAt);
-    room.data = data.gameData || {};
-    room.settings = data.settings || {};
+    room.gameType = updatedObj.get('gameType');
+    room.gameState = gameState;
+    room.players = players ? Object.values(players).sort((a, b) => a.joinedAt - b.joinedAt) : [];
+    room.data = gameData || {};
+    room.settings = settings || {};
+    
+    // 更新 dbRef 引用，保持使用最新的对象
+    room.dbRef = updatedObj;
     
     const host = room.players.find(p => p.isHost);
     room.isHost = host && host.id === room.myPlayerId;
     
     onRoomUpdate();
-  };
+  });
   
-  room.dbRef.on('value', room.listener);
+  liveQuery.on('delete', () => {
+    showToast('房间已解散');
+    leaveRoom();
+  });
+  
+  liveQuery.subscribe().then(() => {
+    console.log('LiveQuery 订阅成功');
+  }).catch(err => {
+    console.error('LiveQuery 订阅失败:', err);
+  });
 }
 
 function onRoomUpdate() {
@@ -314,7 +344,12 @@ function renderLobby() {
 
 function changeSetting(key, value) {
   if (!room.isHost || !room.dbRef) return;
-  room.dbRef.child('settings/' + key).set(value);
+  const settings = { ...(room.settings || {}) };
+  settings[key] = value;
+  room.dbRef.set('settings', settings);
+  room.dbRef.save().catch(err => {
+    console.error('更新设置失败:', err);
+  });
 }
 
 function copyRoomLink() {
@@ -349,33 +384,60 @@ function startRoomGame() {
 
 function leaveRoom() {
   if (room.dbRef && room.myPlayerId) {
-    room.dbRef.child('players/' + room.myPlayerId).remove().catch(() => {});
+    const players = room.dbRef.get('players') || {};
+    delete players[room.myPlayerId];
     
-    if (room.isHost && room.players.length <= 1) {
-      room.dbRef.remove().catch(() => {});
+    const playerCount = Object.keys(players).length;
+    
+    if (playerCount <= 0) {
+      // 房间无人，销毁
+      room.dbRef.destroy().catch(() => {});
+    } else {
+      // 如果我是房主且还有人，转移房主
+      if (room.isHost) {
+        const remainingIds = Object.keys(players);
+        if (remainingIds.length > 0) {
+          const newHostId = remainingIds[0];
+          players[newHostId].isHost = true;
+        }
+      }
+      
+      room.dbRef.set('players', players);
+      room.dbRef.save().catch(() => {});
     }
   }
   
-  if (room.dbRef && room.listener) {
-    room.dbRef.off('value', room.listener);
+  // 取消 LiveQuery 订阅
+  if (room.liveQuery) {
+    try {
+      room.liveQuery.unsubscribe();
+    } catch (e) {
+      // ignore
+    }
   }
   
   room.id = null;
   room.myPlayerId = null;
   room.dbRef = null;
+  room.liveQuery = null;
   room.listener = null;
+  room.players = [];
+  room.data = {};
+  room.settings = {};
+  room.gameState = 'lobby';
   
   navTo('home');
   window.history.replaceState({}, '', window.location.pathname);
 }
 
 function backToLobby() {
-  if (!room.isHost) {
-    room.dbRef.child('gameState').set('lobby');
-  } else {
-    room.dbRef.child('gameState').set('lobby');
-    room.dbRef.child('gameData').set({});
-  }
+  if (!room.dbRef) return;
+  // 批量更新：设置 gameState 和清空 gameData
+  room.dbRef.set('gameState', 'lobby');
+  room.dbRef.set('gameData', {});
+  room.dbRef.save().catch(err => {
+    console.error('返回大厅失败:', err);
+  });
 }
 
 function confirmLeaveGame() {
@@ -420,8 +482,11 @@ function startUndercoverGame() {
     votes: {},
   };
   
-  room.dbRef.child('gameData').set(gameData);
-  room.dbRef.child('gameState').set('playing');
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.set('gameState', 'playing');
+  room.dbRef.save().catch(err => {
+    console.error('开始卧底游戏失败:', err);
+  });
 }
 
 function updateUndercoverGame() {
@@ -493,23 +558,34 @@ function renderUndercoverGame() {
 }
 
 function muNextSpeaker() {
-  if (!room.isHost) return;
+  if (!room.isHost || !room.dbRef) return;
   
   const data = room.data;
   const alivePlayers = room.players.filter(p => data.alivePlayerIds && data.alivePlayerIds.includes(p.id));
   const nextIndex = (data.currentSpeakerIndex || 0) + 1;
   
   if (nextIndex < alivePlayers.length) {
-    room.dbRef.child('gameData/currentSpeakerIndex').set(nextIndex);
+    const gameData = { ...data };
+    gameData.currentSpeakerIndex = nextIndex;
+    room.dbRef.set('gameData', gameData);
+    room.dbRef.save().catch(err => {
+      console.error('切换发言者失败:', err);
+    });
   }
 }
 
 function muGoToVote() {
-  if (!room.isHost) return;
-  room.dbRef.child('gameData/phase').set('vote');
-  room.dbRef.child('gameData/votes').set({});
-  navTo('mu-vote');
-  renderMuVoteList();
+  if (!room.isHost || !room.dbRef) return;
+  const gameData = { ...(room.data || {}) };
+  gameData.phase = 'vote';
+  gameData.votes = {};
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.save().then(() => {
+    navTo('mu-vote');
+    renderMuVoteList();
+  }).catch(err => {
+    console.error('进入投票阶段失败:', err);
+  });
 }
 
 function renderMuVoteList() {
@@ -543,12 +619,19 @@ function renderMuVoteList() {
 }
 
 function muVoteFor(playerId) {
-  room.dbRef.child('gameData/votes/' + room.myPlayerId).set(playerId);
+  if (!room.dbRef) return;
+  const gameData = { ...(room.data || {}) };
+  if (!gameData.votes) gameData.votes = {};
+  gameData.votes[room.myPlayerId] = playerId;
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.save().catch(err => {
+    console.error('投票失败:', err);
+  });
   renderMuVoteList();
 }
 
 function muSubmitVote() {
-  if (!room.isHost) return;
+  if (!room.isHost || !room.dbRef) return;
   
   const data = room.data;
   const votes = data.votes || {};
@@ -590,17 +673,25 @@ function muSubmitVote() {
     result = 'undercover_win';
   }
   
+  const gameData = { ...data };
+  
   if (gameOver) {
-    room.dbRef.child('gameData/eliminatedId').set(eliminatedId);
-    room.dbRef.child('gameData/result').set(result);
-    room.dbRef.child('gameState').set('result');
+    gameData.eliminatedId = eliminatedId;
+    gameData.result = result;
+    room.dbRef.set('gameData', gameData);
+    room.dbRef.set('gameState', 'result');
   } else {
-    room.dbRef.child('gameData/alivePlayerIds').set(newAlive);
-    room.dbRef.child('gameData/round').set((data.round || 1) + 1);
-    room.dbRef.child('gameData/currentSpeakerIndex').set(0);
-    room.dbRef.child('gameData/phase').set('describe');
-    room.dbRef.child('gameData/votes').set({});
+    gameData.alivePlayerIds = newAlive;
+    gameData.round = (data.round || 1) + 1;
+    gameData.currentSpeakerIndex = 0;
+    gameData.phase = 'describe';
+    gameData.votes = {};
+    room.dbRef.set('gameData', gameData);
   }
+  
+  room.dbRef.save().catch(err => {
+    console.error('提交投票结果失败:', err);
+  });
 }
 
 function showUCMultiResult() {
@@ -657,8 +748,11 @@ function startBombGame() {
     history: [],
   };
   
-  room.dbRef.child('gameData').set(gameData);
-  room.dbRef.child('gameState').set('playing');
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.set('gameState', 'playing');
+  room.dbRef.save().catch(err => {
+    console.error('开始数字炸弹失败:', err);
+  });
 }
 
 function updateBombGame() {
@@ -700,6 +794,8 @@ function renderBombGame() {
 }
 
 function mbGuess() {
+  if (!room.dbRef) return;
+  
   const data = room.data;
   const currentPlayer = room.players[data.currentPlayerIndex || 0];
   if (!currentPlayer || currentPlayer.id !== room.myPlayerId) {
@@ -717,18 +813,23 @@ function mbGuess() {
   
   vibrate(30);
   
+  const gameData = { ...data };
+  
   if (num === data.bombNum) {
-    const history = [...(data.history || []), {
+    gameData.history = [...(data.history || []), {
       playerId: room.myPlayerId,
       num: num,
       newMin: data.currentMin,
       newMax: data.currentMax,
     }];
+    gameData.guessCount = (data.guessCount || 0) + 1;
+    gameData.loserId = room.myPlayerId;
     
-    room.dbRef.child('gameData/history').set(history);
-    room.dbRef.child('gameData/guessCount').set((data.guessCount || 0) + 1);
-    room.dbRef.child('gameData/loserId').set(room.myPlayerId);
-    room.dbRef.child('gameState').set('result');
+    room.dbRef.set('gameData', gameData);
+    room.dbRef.set('gameState', 'result');
+    room.dbRef.save().catch(err => {
+      console.error('更新失败:', err);
+    });
     return;
   }
   
@@ -741,20 +842,21 @@ function mbGuess() {
     newMax = num - 1;
   }
   
-  const history = [...(data.history || []), {
+  gameData.history = [...(data.history || []), {
     playerId: room.myPlayerId,
     num: num,
     newMin: newMin,
     newMax: newMax,
   }];
+  gameData.currentMin = newMin;
+  gameData.currentMax = newMax;
+  gameData.currentPlayerIndex = (data.currentPlayerIndex + 1) % room.players.length;
+  gameData.guessCount = (data.guessCount || 0) + 1;
   
-  const nextIndex = (data.currentPlayerIndex + 1) % room.players.length;
-  
-  room.dbRef.child('gameData/currentMin').set(newMin);
-  room.dbRef.child('gameData/currentMax').set(newMax);
-  room.dbRef.child('gameData/currentPlayerIndex').set(nextIndex);
-  room.dbRef.child('gameData/guessCount').set((data.guessCount || 0) + 1);
-  room.dbRef.child('gameData/history').set(history);
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.save().catch(err => {
+    console.error('猜测失败:', err);
+  });
   
   input.value = '';
 }
@@ -802,8 +904,11 @@ function startWordGuessGame() {
     startTime: null,
   };
   
-  room.dbRef.child('gameData').set(gameData);
-  room.dbRef.child('gameState').set('playing');
+  room.dbRef.set('gameData', gameData);
+  room.dbRef.set('gameState', 'playing');
+  room.dbRef.save().catch(err => {
+    console.error('开始猜词游戏失败:', err);
+  });
 }
 
 function updateWordGuessGame() {
@@ -876,39 +981,51 @@ function renderWordGuessGame() {
 }
 
 function mwCorrect() {
-  if (!room.isHost) return;
+  if (!room.isHost || !room.dbRef) return;
   const data = room.data;
   const nextIndex = (data.currentWordIndex || 0) + 1;
   const words = data.words || [];
   
+  const gameData = { ...data };
+  gameData.correct = (data.correct || 0) + 1;
+  
   if (nextIndex >= words.length) {
-    room.dbRef.child('gameData/correct').set((data.correct || 0) + 1);
-    room.dbRef.child('gameData/phase').set('finished');
-    room.dbRef.child('gameState').set('result');
-    return;
+    gameData.phase = 'finished';
+    room.dbRef.set('gameData', gameData);
+    room.dbRef.set('gameState', 'result');
+  } else {
+    gameData.currentWordIndex = nextIndex;
+    room.dbRef.set('gameData', gameData);
   }
   
-  room.dbRef.child('gameData/correct').set((data.correct || 0) + 1);
-  room.dbRef.child('gameData/currentWordIndex').set(nextIndex);
+  room.dbRef.save().catch(err => {
+    console.error('操作失败:', err);
+  });
   
   vibrate(30);
 }
 
 function mwSkip() {
-  if (!room.isHost) return;
+  if (!room.isHost || !room.dbRef) return;
   const data = room.data;
   const nextIndex = (data.currentWordIndex || 0) + 1;
   const words = data.words || [];
   
+  const gameData = { ...data };
+  gameData.skip = (data.skip || 0) + 1;
+  
   if (nextIndex >= words.length) {
-    room.dbRef.child('gameData/skip').set((data.skip || 0) + 1);
-    room.dbRef.child('gameData/phase').set('finished');
-    room.dbRef.child('gameState').set('result');
-    return;
+    gameData.phase = 'finished';
+    room.dbRef.set('gameData', gameData);
+    room.dbRef.set('gameState', 'result');
+  } else {
+    gameData.currentWordIndex = nextIndex;
+    room.dbRef.set('gameData', gameData);
   }
   
-  room.dbRef.child('gameData/skip').set((data.skip || 0) + 1);
-  room.dbRef.child('gameData/currentWordIndex').set(nextIndex);
+  room.dbRef.save().catch(err => {
+    console.error('操作失败:', err);
+  });
   
   vibrate(20);
 }
@@ -944,7 +1061,7 @@ function checkAutoJoin() {
   const urlParams = new URLSearchParams(window.location.search);
   const roomId = urlParams.get('room');
   
-  if (roomId && firebaseAvailable) {
+  if (roomId && leancloudAvailable) {
     document.getElementById('join-room-id').value = roomId;
     showJoinRoom();
   }

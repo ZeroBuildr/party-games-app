@@ -861,22 +861,26 @@
     <!-- Toast提示 -->
     <div id="toast" class="toast" style="display:none"></div>
 
-    <!-- Firebase配置提示弹窗 -->
-    <div id="firebase-setup-modal" class="modal" style="display:none">
+    <!-- LeanCloud配置提示弹窗 -->
+    <div id="leancloud-setup-modal" class="modal" style="display:none">
       <div class="modal-content">
-        <h3>🔧 首次使用请配置 Firebase</h3>
-        <p class="modal-desc">多人联机功能需要 Firebase 实时数据库支持。请按照以下步骤配置：</p>
+        <h3>🔧 首次使用请配置 LeanCloud</h3>
+        <p class="modal-desc">多人联机功能需要 LeanCloud 数据存储支持。请按照以下步骤配置：</p>
         <div class="setup-steps">
           <div class="step-item">
             <span class="step-num">1</span>
-            <span>访问 <a href="https://console.firebase.google.com/" target="_blank">Firebase 控制台</a></span>
+            <span>访问 <a href="https://console.leancloud.cn/" target="_blank">LeanCloud 控制台</a></span>
           </div>
           <div class="step-item">
             <span class="step-num">2</span>
-            <span>创建新项目，启用 Realtime Database</span>
+            <span>注册账号并创建应用</span>
           </div>
           <div class="step-item">
             <span class="step-num">3</span>
+            <span>在应用设置中获取 AppID 和 AppKey</span>
+          </div>
+          <div class="step-item">
+            <span class="step-num">4</span>
             <span>将配置信息填入 <code>js/firebase-config.js</code></span>
           </div>
         </div>
@@ -884,15 +888,15 @@
           配置完成后刷新页面即可使用多人联机功能。未配置时可使用单机模式。
         </p>
         <div class="modal-actions">
-          <button class="btn-primary" onclick="closeModal('firebase-setup-modal')">我知道了</button>
+          <button class="btn-primary" onclick="closeModal('leancloud-setup-modal')">我知道了</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- LeanCloud SDK -->
+  <script src="//code.bdstatic.com/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+  <script src="//code.bdstatic.com/npm/leancloud-storage@4.13.2/dist/av-live-query-min.js"></script>
   
   <script src="js/firebase-config.js"></script>
   <script src="js/wordbank.js"></script>
