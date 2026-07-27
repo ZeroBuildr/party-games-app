@@ -404,18 +404,11 @@ function restartUndercover() {
 
 // 结束谁是卧底游戏
 function endUndercoverGame() {
-  showConfirmModal('结束游戏', '确定要结束当前游戏吗？当前进度将丢失。', () => {
-    if (uc.describeTimer) {
-      clearInterval(uc.describeTimer);
-      uc.describeTimer = null;
-    }
-    saveStat('undercover', {
-      result: '中途结束',
-      players: uc.playerCount,
-      round: uc.round,
-    });
-    navTo('home');
-  });
+  if (uc.describeTimer) {
+    clearInterval(uc.describeTimer);
+    uc.describeTimer = null;
+  }
+  navTo('home');
 }
 
 // ==================== 数字炸弹 - 单机 ====================
@@ -548,15 +541,7 @@ function confirmExitBomb() {
 }
 
 function endBombGame() {
-  showConfirmModal('结束游戏', '确定要结束当前游戏吗？当前进度将丢失。', () => {
-    saveStat('bomb', {
-      result: '中途结束',
-      players: bomb.playerCount,
-      guessCount: bomb.guessCount,
-      bombNum: bomb.bombNum,
-    });
-    navTo('home');
-  });
+  navTo('home');
 }
 
 function restartBomb() {
@@ -693,13 +678,11 @@ function nextWGWord() {
 }
 
 function endWordGuessGame() {
-  showConfirmModal('结束本轮', '确定要结束本轮猜词吗？将查看本轮成绩。', () => {
-    if (wg.timer) {
-      clearInterval(wg.timer);
-      wg.timer = null;
-    }
-    showWGResult();
-  });
+  if (wg.timer) {
+    clearInterval(wg.timer);
+    wg.timer = null;
+  }
+  navTo('home');
 }
 
 function showWGResult() {
