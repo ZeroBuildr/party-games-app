@@ -179,19 +179,20 @@
             <span class="result-label">身份</span>
             <span class="result-value" id="uc-identity">卧底</span>
           </div>
-          <div class="result-row">
+          <div class="result-row uc-word-row" id="uc-civilian-row">
             <span class="result-label">平民词</span>
             <span class="result-value" id="uc-civilian-word">可乐</span>
           </div>
-          <div class="result-row">
+          <div class="result-row uc-word-row" id="uc-undercover-row">
             <span class="result-label">卧底词</span>
             <span class="result-value" id="uc-undercover-word">雪碧</span>
           </div>
         </div>
-        <div class="result-actions">
+        <div class="result-actions" id="uc-result-actions">
           <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
           <button class="btn-primary" onclick="restartUndercover()">再来一局</button>
         </div>
+        <button class="btn-primary btn-full" id="uc-continue-btn" onclick="continueUndercover()" style="display:none">继续游戏</button>
       </div>
     </div>
 

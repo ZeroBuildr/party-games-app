@@ -342,24 +342,21 @@ function submitVote() {
 function showUCResult(eliminatedPlayer, isUndercover) {
   document.getElementById('uc-eliminated').textContent = eliminatedPlayer.name;
   document.getElementById('uc-identity').textContent = isUndercover ? '卧底' : '平民';
-  document.getElementById('uc-civilian-word').textContent = uc.civilianWord;
-  document.getElementById('uc-undercover-word').textContent = uc.undercoverWord;
-  
+
   const aliveUndercover = uc.undercoverPlayers.filter(id => {
     const p = uc.players.find(pl => pl.id === id);
     return p && p.alive;
   });
-  
+
   const aliveCivilians = uc.players.filter(p => p.alive && !uc.undercoverPlayers.includes(p.id));
-  
-  let civilianWin = false;
+
   let title = '';
   let desc = '';
   let icon = '';
-  
+  let gameContinue = false;
+
   if (isUndercover) {
     if (aliveUndercover.length === 0) {
-      civilianWin = true;
       title = '平民胜利！';
       desc = '所有卧底都被找出了';
       icon = '🎉';
@@ -369,13 +366,13 @@ function showUCResult(eliminatedPlayer, isUndercover) {
         round: uc.round,
       });
     } else {
-      title = isUndercover ? '卧底被投出' : '平民被投出';
+      gameContinue = true;
+      title = '卧底被投出';
       desc = '还有卧底在潜伏，继续游戏';
       icon = '😏';
     }
   } else {
     if (aliveCivilians.length <= aliveUndercover.length) {
-      civilianWin = false;
       title = '卧底胜利！';
       desc = '卧底成功隐藏到了最后';
       icon = '😎';
@@ -385,17 +382,43 @@ function showUCResult(eliminatedPlayer, isUndercover) {
         round: uc.round,
       });
     } else {
+      gameContinue = true;
       title = '平民被投出';
       desc = '还有卧底在潜伏，继续游戏';
       icon = '😱';
     }
   }
-  
+
   document.getElementById('uc-result-title').textContent = title;
   document.getElementById('uc-result-desc').textContent = desc;
   document.getElementById('uc-result-icon').textContent = icon;
-  
+
+  const wordRows = document.querySelectorAll('.uc-word-row');
+  const actionsEl = document.getElementById('uc-result-actions');
+  const continueBtn = document.getElementById('uc-continue-btn');
+
+  if (gameContinue) {
+    wordRows.forEach(r => r.style.display = 'none');
+    if (actionsEl) actionsEl.style.display = 'none';
+    if (continueBtn) continueBtn.style.display = 'block';
+  } else {
+    document.getElementById('uc-civilian-word').textContent = uc.civilianWord;
+    document.getElementById('uc-undercover-word').textContent = uc.undercoverWord;
+    wordRows.forEach(r => r.style.display = '');
+    if (actionsEl) actionsEl.style.display = 'flex';
+    if (continueBtn) continueBtn.style.display = 'none';
+  }
+
   navTo('undercover-result');
+}
+
+function continueUndercover() {
+  uc.round++;
+  uc.alivePlayers = uc.players.filter(p => p.alive);
+  uc.currentSpeaker = 0;
+  updateDescribePage();
+  navTo('undercover-describe');
+  startDescribeTimer();
 }
 
 function restartUndercover() {
