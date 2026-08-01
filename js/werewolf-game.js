@@ -407,6 +407,8 @@ function wwNightUndo() {
 function wwDawn() {
   ww.phase = 'dawn';
   ww.nightDeaths = wwCalculateDeaths();
+  if (ww.nightActions.witchSave) ww.witchPotions.save = 0;
+  if (ww.nightActions.witchPoison !== null) ww.witchPotions.poison = 0;
   ww.nightDeaths.forEach(d => {
     const player = ww.players.find(p => p.num === d.num);
     if (player) {
@@ -845,7 +847,7 @@ function wwRenderSelectGrid(opts) {
     </div>`;
   });
   html += '</div>';
-  if (selected !== undefined && opts.selected !== null) {
+  if (opts.selected !== null && opts.selected !== undefined) {
     const sel = ww.players.find(p => p.num === opts.selected);
     if (sel) {
       html += `<div class="ww-selected-info">已选择 ${sel.num} 号（${werewolfRoles[sel.role].name}）</div>`;
@@ -895,9 +897,6 @@ function wwRenderWitchAction() {
   } else if (ww.witchPotions.poison <= 0) {
     html += '<div class="ww-witch-hint">毒药已用完</div>';
   }
-
-  if (ww.nightActions.witchSave) ww.witchPotions.save = 0;
-  if (ww.nightActions.witchPoison !== null) ww.witchPotions.poison = 0;
 
   return html;
 }
