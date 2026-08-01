@@ -175,6 +175,16 @@ function initChipGroups() {
           if (typeof wg !== 'undefined') {
             wg.category = chip.dataset.val;
           }
+        } else if (groupId === 'ww-player-count') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof ww !== 'undefined') {
+            ww.playerCount = parseInt(chip.dataset.val);
+            ww.boardType = getDefaultBoard(ww.playerCount);
+            if (typeof wwRenderSetupBoards === 'function') {
+              wwRenderSetupBoards();
+            }
+          }
         }
       });
     });
@@ -225,12 +235,13 @@ function renderStats() {
   const ucCount = app.stats.filter(s => s.game === 'undercover').length;
   const bombCount = app.stats.filter(s => s.game === 'bomb').length;
   const wgCount = app.stats.filter(s => s.game === 'wordguess').length;
-  
+  const wwCount = app.stats.filter(s => s.game === 'werewolf').length;
+
   const totalEl = document.getElementById('stats-total');
   const ucEl = document.getElementById('stats-uc');
   const bombEl = document.getElementById('stats-bomb');
   const wgEl = document.getElementById('stats-wg');
-  
+
   if (totalEl) totalEl.textContent = total;
   if (ucEl) ucEl.textContent = ucCount;
   if (bombEl) bombEl.textContent = bombCount;
@@ -256,6 +267,7 @@ function renderStats() {
     undercover: '🕵️ 谁是卧底',
     bomb: '💣 数字炸弹',
     wordguess: '🤔 猜词助手',
+    werewolf: '🐺 狼人杀法官',
   };
   
   list.innerHTML = filtered.map(record => {
@@ -269,6 +281,8 @@ function renderStats() {
       detail = `${record.players}人 · 猜了${record.guessCount}次 · ${record.result}`;
     } else if (record.game === 'wordguess') {
       detail = `猜中${record.correct}个 · 跳过${record.skip}个 · ${record.duration}秒`;
+    } else if (record.game === 'werewolf') {
+      detail = `${record.players}人 · ${record.rounds}局 · ${record.result}`;
     }
     
     return `

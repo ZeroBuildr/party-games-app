@@ -47,6 +47,14 @@
           </div>
           <span class="arrow">›</span>
         </div>
+        <div class="game-card" onclick="startWerewolf()">
+          <div class="game-emoji">🐺</div>
+          <div class="game-info">
+            <h3>狼人杀法官</h3>
+            <p>自动引导全流程，无需背规则</p>
+          </div>
+          <span class="arrow">›</span>
+        </div>
       </div>
 
       <div class="wordbank-info">
@@ -435,6 +443,152 @@
       </div>
     </div>
 
+    <!-- 狼人杀法官 - 设置页 -->
+    <div id="page-werewolf-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">狼人杀法官</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="setup-content">
+        <div class="setup-section">
+          <h4>游玩人数</h4>
+          <div class="chip-group" id="ww-player-count">
+            <span class="chip" data-val="6">6人</span>
+            <span class="chip" data-val="7">7人</span>
+            <span class="chip" data-val="8">8人</span>
+            <span class="chip" data-val="9">9人</span>
+            <span class="chip" data-val="10">10人</span>
+            <span class="chip" data-val="11">11人</span>
+            <span class="chip active" data-val="12">12人</span>
+            <span class="chip" data-val="13">13人</span>
+            <span class="chip" data-val="14">14人</span>
+            <span class="chip" data-val="15">15人</span>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>板子选择</h4>
+          <div id="ww-board-list"></div>
+        </div>
+        <div class="setup-section">
+          <h4>规则设置</h4>
+          <div class="ww-options">
+            <div class="ww-option-item" onclick="wwToggleOption('sheriff')">
+              <span>开启警长</span>
+              <label class="switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="ww-opt-sheriff" checked onchange="wwToggleOption('sheriff')">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="ww-option-item" onclick="wwToggleOption('selfSaveFirstNight')">
+              <span>首夜可自救</span>
+              <label class="switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="ww-opt-selfsave" onchange="wwToggleOption('selfSaveFirstNight')">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="ww-option-item" onclick="wwToggleOption('lastWords')">
+              <span>首夜遗言</span>
+              <label class="switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="ww-opt-lastwords" checked onchange="wwToggleOption('lastWords')">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="ww-option-item" onclick="wwToggleOption('selfKill')">
+              <span>允许自刀</span>
+              <label class="switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="ww-opt-selfkill" checked onchange="wwToggleOption('selfKill')">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="rule-tip">
+          <strong>法官操作：</strong>选择人数和板子后，APP自动分配角色。法官线下给玩家编号1~N，APP全程以编号指代玩家，按引导操作即可。
+        </div>
+        <button class="btn-primary btn-full" onclick="wwConfirmSetup()">确认生成角色</button>
+      </div>
+    </div>
+
+    <!-- 狼人杀法官 - 角色预览页 -->
+    <div id="page-werewolf-roles" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('werewolf-setup')">‹</span>
+        <span class="page-title">角色分配（仅法官可见）</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="ww-roles-content">
+        <div class="ww-roles-summary" id="ww-roles-summary"></div>
+        <div class="ww-roles-list" id="ww-roles-list"></div>
+        <div class="rule-tip">
+          <strong>注意：</strong>请确保周围无其他玩家时查看。记下每个编号对应的身份，线下发放身份牌。
+        </div>
+        <button class="btn-primary btn-full" onclick="wwStartGame()">确认发牌，开始游戏</button>
+      </div>
+    </div>
+
+    <!-- 狼人杀法官 - 游戏主流程页 -->
+    <div id="page-werewolf-game" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="wwEndGame()">‹</span>
+        <span class="page-title" id="ww-phase-title">黑夜阶段</span>
+        <span class="ww-rules-btn" onclick="wwShowRules()">📖</span>
+      </div>
+      <div class="ww-game-content">
+        <div class="ww-phase-indicator">
+          第 <span id="ww-round">1</span> 局 · <span id="ww-step-name">发牌阶段</span>
+        </div>
+        <div class="ww-guide-card">
+          <div class="ww-guide-icon" id="ww-guide-icon">🎴</div>
+          <div class="ww-guide-title" id="ww-guide-title">发牌阶段</div>
+          <div class="ww-guide-text" id="ww-guide-text">引导文案</div>
+        </div>
+        <div class="ww-action-area" id="ww-action-area"></div>
+        <div class="ww-player-panel" id="ww-player-panel"></div>
+        <div class="ww-bottom-actions">
+          <button class="btn-outline ww-btn-undo" id="ww-undo-btn" onclick="wwUndo()">撤销</button>
+          <button class="btn-primary ww-btn-next" id="ww-next-btn" onclick="wwNext()">下一步</button>
+        </div>
+        <button class="btn-danger btn-full btn-end" onclick="wwEndGame()">结束游戏</button>
+      </div>
+    </div>
+
+    <!-- 狼人杀法官 - 结束页 -->
+    <div id="page-werewolf-end" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">游戏结束</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="ww-end-content">
+        <div class="ww-end-winner" id="ww-end-winner">好人胜利</div>
+        <div class="ww-end-reason" id="ww-end-reason">所有狼人出局</div>
+        <div class="ww-end-section">
+          <h4>角色身份</h4>
+          <div class="ww-end-roles" id="ww-end-roles"></div>
+        </div>
+        <div class="ww-end-section">
+          <h4>对局记录</h4>
+          <div class="ww-end-log" id="ww-end-log"></div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
+          <button class="btn-primary" onclick="wwRestart()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 狼人杀规则弹窗 -->
+    <div id="ww-rules-modal" class="modal-overlay" style="display:none">
+      <div class="modal-card ww-rules-modal-card">
+        <h3 class="modal-title">角色规则</h3>
+        <div class="ww-rules-content" id="ww-rules-content"></div>
+        <div class="modal-actions">
+          <button class="btn-primary" onclick="wwCloseRules()">知道了</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 战绩页 -->
     <div id="page-stats" class="page">
       <div class="stats-header">
@@ -463,6 +617,7 @@
         <span class="filter-chip" data-filter="undercover">谁是卧底</span>
         <span class="filter-chip" data-filter="bomb">数字炸弹</span>
         <span class="filter-chip" data-filter="wordguess">猜词助手</span>
+        <span class="filter-chip" data-filter="werewolf">狼人杀</span>
       </div>
       <div class="stats-list" id="stats-list">
         <div class="empty-state">
@@ -521,7 +676,7 @@
         </div>
       </div>
       <div class="app-info">
-        <p>派对游戏盒 v1.0</p>
+        <p>派对游戏盒 v2.0</p>
         <p class="app-info-sub">传手机就能玩 · 点开即玩</p>
       </div>
     </div>
@@ -586,6 +741,8 @@
   <script src="js/wordbank.js"></script>
   <script src="js/wordbank-manager.js"></script>
   <script src="js/single-mode.js"></script>
+  <script src="js/werewolf-data.js"></script>
+  <script src="js/werewolf-game.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
