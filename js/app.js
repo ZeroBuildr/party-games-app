@@ -175,6 +175,42 @@ function initChipGroups() {
           if (typeof wg !== 'undefined') {
             wg.category = chip.dataset.val;
           }
+        } else if (groupId === 'qb-category') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof qb !== 'undefined') {
+            qb.category = chip.dataset.val;
+          }
+        } else if (groupId === 'qb-round') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof qb !== 'undefined') {
+            qb.round = parseInt(chip.dataset.val);
+          }
+        } else if (groupId === 'sg-category') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof sg !== 'undefined') {
+            sg.category = chip.dataset.val;
+          }
+        } else if (groupId === 'sg-round') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof sg !== 'undefined') {
+            sg.round = parseInt(chip.dataset.val);
+          }
+        } else if (groupId === 'eg-category') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof eg !== 'undefined') {
+            eg.category = chip.dataset.val;
+          }
+        } else if (groupId === 'eg-round') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof eg !== 'undefined') {
+            eg.round = parseInt(chip.dataset.val);
+          }
         }
       });
     });
@@ -225,16 +261,25 @@ function renderStats() {
   const ucCount = app.stats.filter(s => s.game === 'undercover').length;
   const bombCount = app.stats.filter(s => s.game === 'bomb').length;
   const wgCount = app.stats.filter(s => s.game === 'wordguess').length;
-  
+  const qbCount = app.stats.filter(s => s.game === 'quotebattle').length;
+  const sgCount = app.stats.filter(s => s.game === 'sceneguess').length;
+  const egCount = app.stats.filter(s => s.game === 'emojiguess').length;
+
   const totalEl = document.getElementById('stats-total');
   const ucEl = document.getElementById('stats-uc');
   const bombEl = document.getElementById('stats-bomb');
   const wgEl = document.getElementById('stats-wg');
-  
+  const qbEl = document.getElementById('stats-qb');
+  const sgEl = document.getElementById('stats-sg');
+  const egEl = document.getElementById('stats-eg');
+
   if (totalEl) totalEl.textContent = total;
   if (ucEl) ucEl.textContent = ucCount;
   if (bombEl) bombEl.textContent = bombCount;
   if (wgEl) wgEl.textContent = wgCount;
+  if (qbEl) qbEl.textContent = qbCount;
+  if (sgEl) sgEl.textContent = sgCount;
+  if (egEl) egEl.textContent = egCount;
   
   let filtered = app.stats;
   if (app.statsFilter !== 'all') {
@@ -256,12 +301,15 @@ function renderStats() {
     undercover: '🕵️ 谁是卧底',
     bomb: '💣 数字炸弹',
     wordguess: '🤔 猜词助手',
+    quotebattle: '🎤 台词飞花',
+    sceneguess: '🎬 经典复刻',
+    emojiguess: '🎭 看图猜影视',
   };
-  
+
   list.innerHTML = filtered.map(record => {
     const date = new Date(record.date);
     const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    
+
     let detail = '';
     if (record.game === 'undercover') {
       detail = `${record.players}人 · ${record.round}轮 · ${record.result}`;
@@ -269,6 +317,8 @@ function renderStats() {
       detail = `${record.players}人 · 猜了${record.guessCount}次 · ${record.result}`;
     } else if (record.game === 'wordguess') {
       detail = `猜中${record.correct}个 · 跳过${record.skip}个 · ${record.duration}秒`;
+    } else if (record.game === 'quotebattle' || record.game === 'sceneguess' || record.game === 'emojiguess') {
+      detail = `完成${record.round}题`;
     }
     
     return `

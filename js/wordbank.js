@@ -5185,6 +5185,15 @@ function getTotalWordCount() {
   for (let cat in customWG) {
     if (!wordGuessWords[cat]) count += customWG[cat].length;
   }
+  if (typeof quoteBattleData !== 'undefined') {
+    for (let cat in quoteBattleData) count += quoteBattleData[cat].length;
+  }
+  if (typeof sceneGuessData !== 'undefined') {
+    for (let cat in sceneGuessData) count += sceneGuessData[cat].length;
+  }
+  if (typeof emojiGuessData !== 'undefined') {
+    for (let cat in emojiGuessData) count += emojiGuessData[cat].length;
+  }
   return count;
 }
 
