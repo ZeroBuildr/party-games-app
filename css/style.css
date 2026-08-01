@@ -1986,26 +1986,18 @@ body::after {
   background: var(--bg2);
   border-radius: 22px;
   padding: 4px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.wb-game-tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .wb-game-tab {
-  flex-shrink: 0;
+  flex: 1;
   text-align: center;
-  padding: 10px 14px;
+  padding: 10px;
   border-radius: 18px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--muted);
   cursor: pointer;
   transition: all 0.25s var(--ease-spring);
-  white-space: nowrap;
 }
 
 .wb-game-tab.active {
@@ -2086,19 +2078,6 @@ body::after {
   border: 1px solid rgba(46, 196, 182, 0.3);
 }
 
-.wb-word-long {
-  width: 100%;
-  align-items: flex-start;
-  padding: 10px 14px;
-}
-
-.wb-word-long .wb-word-text {
-  flex: 1;
-  font-size: 13px;
-  line-height: 1.6;
-  word-break: break-word;
-}
-
 .wb-word-text {
   line-height: 1.4;
 }
@@ -2160,179 +2139,3 @@ body::after {
 .setting-item.clickable:active {
   background: var(--bg2);
 }
-
-/* ==================== 台词飞花 / 经典复刻 / 看图猜影视 通用样式 ==================== */
-.quiz-play-content {
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.quiz-progress {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 20px;
-  font-weight: 500;
-}
-
-.quiz-prompt-card {
-  width: 100%;
-  background: var(--gradient);
-  color: var(--white);
-  border-radius: 22px;
-  padding: 36px 24px;
-  text-align: center;
-  margin-bottom: 20px;
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 8px 28px rgba(232, 93, 58, 0.20);
-  position: relative;
-  overflow: hidden;
-}
-
-.quiz-prompt-card::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-}
-
-.quiz-prompt-card::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: -15px;
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 50%;
-}
-
-.quiz-prompt-label {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.9;
-  margin-bottom: 14px;
-  position: relative;
-  z-index: 1;
-}
-
-.quiz-prompt-text {
-  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: 1px;
-  position: relative;
-  z-index: 1;
-  word-break: break-word;
-}
-
-.quiz-answer-area {
-  width: 100%;
-  margin-bottom: 20px;
-  animation: answerIn 0.3s var(--ease-spring);
-}
-
-@keyframes answerIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.quiz-answer-card {
-  width: 100%;
-  background: var(--white);
-  border: 2px solid rgba(46, 196, 182, 0.3);
-  border-radius: 18px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: var(--shadow-md);
-}
-
-.quiz-answer-label {
-  font-size: 12px;
-  color: var(--accent3);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 10px;
-}
-
-.quiz-answer-text {
-  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
-  font-size: 22px;
-  color: var(--ink);
-  line-height: 1.5;
-  margin-bottom: 8px;
-}
-
-.quiz-source-text {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-/* 表情猜影视专用 */
-.emoji-prompt-card {
-  width: 100%;
-  background: var(--gradient);
-  color: var(--white);
-  border-radius: 22px;
-  padding: 48px 24px;
-  text-align: center;
-  margin-bottom: 20px;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 8px 28px rgba(232, 93, 58, 0.20);
-  position: relative;
-  overflow: hidden;
-}
-
-.emoji-prompt-card::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-}
-
-.emoji-prompt-label {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.9;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.emoji-display {
-  font-size: 56px;
-  line-height: 1.4;
-  position: relative;
-  z-index: 1;
-  letter-spacing: 4px;
-}
-
-/* 游戏卡片入场动画补充 */
-.game-card:nth-child(4) { animation-delay: 0.32s; }
-.game-card:nth-child(5) { animation-delay: 0.40s; }
-.game-card:nth-child(6) { animation-delay: 0.48s; }
-
-.game-card:nth-child(4) .game-emoji { background: rgba(232, 93, 58, 0.12); }
-.game-card:nth-child(5) .game-emoji { background: rgba(245, 166, 35, 0.12); }
-.game-card:nth-child(6) .game-emoji { background: rgba(46, 196, 182, 0.12); }

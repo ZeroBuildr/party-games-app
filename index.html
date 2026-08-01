@@ -47,30 +47,6 @@
           </div>
           <span class="arrow">›</span>
         </div>
-        <div class="game-card" onclick="navTo('quote-setup')">
-          <div class="game-emoji">🎤</div>
-          <div class="game-info">
-            <h3>台词飞花</h3>
-            <p>经典台词，抢答接梗</p>
-          </div>
-          <span class="arrow">›</span>
-        </div>
-        <div class="game-card" onclick="navTo('scene-setup')">
-          <div class="game-emoji">🎬</div>
-          <div class="game-info">
-            <h3>经典复刻</h3>
-            <p>场景描述，猜作品名</p>
-          </div>
-          <span class="arrow">›</span>
-        </div>
-        <div class="game-card" onclick="navTo('emoji-setup')">
-          <div class="game-emoji">🎭</div>
-          <div class="game-info">
-            <h3>看图猜影视</h3>
-            <p>表情符号，猜片名</p>
-          </div>
-          <span class="arrow">›</span>
-        </div>
       </div>
 
       <div class="wordbank-info">
@@ -481,27 +457,12 @@
           <div class="summary-num" id="stats-wg">0</div>
           <div class="summary-label">猜词助手</div>
         </div>
-        <div class="summary-card">
-          <div class="summary-num" id="stats-qb">0</div>
-          <div class="summary-label">台词飞花</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-num" id="stats-sg">0</div>
-          <div class="summary-label">经典复刻</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-num" id="stats-eg">0</div>
-          <div class="summary-label">看图猜影视</div>
-        </div>
       </div>
       <div class="stats-filter">
         <span class="filter-chip active" data-filter="all">全部</span>
         <span class="filter-chip" data-filter="undercover">谁是卧底</span>
         <span class="filter-chip" data-filter="bomb">数字炸弹</span>
         <span class="filter-chip" data-filter="wordguess">猜词助手</span>
-        <span class="filter-chip" data-filter="quotebattle">台词飞花</span>
-        <span class="filter-chip" data-filter="sceneguess">经典复刻</span>
-        <span class="filter-chip" data-filter="emojiguess">看图猜影视</span>
       </div>
       <div class="stats-list" id="stats-list">
         <div class="empty-state">
@@ -560,238 +521,8 @@
         </div>
       </div>
       <div class="app-info">
-        <p>派对游戏盒 v2.0</p>
+        <p>派对游戏盒 v1.0</p>
         <p class="app-info-sub">传手机就能玩 · 点开即玩</p>
-      </div>
-    </div>
-
-    <!-- ==================== 台词飞花 ==================== -->
-    <!-- 台词飞花设置页 -->
-    <div id="page-quote-setup" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="navTo('home')">‹</span>
-        <span class="page-title">台词飞花</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="setup-content">
-        <div class="setup-section">
-          <h4>词库分类</h4>
-          <div class="chip-group" id="qb-category">
-            <span class="chip active" data-val="all">综合</span>
-            <span class="chip" data-val="movie">电影</span>
-            <span class="chip" data-val="skit">小品</span>
-            <span class="chip" data-val="tv">电视剧</span>
-            <span class="chip" data-val="anime">动漫</span>
-          </div>
-        </div>
-        <div class="setup-section">
-          <h4>游戏轮数</h4>
-          <div class="chip-group" id="qb-round">
-            <span class="chip" data-val="5">5轮</span>
-            <span class="chip active" data-val="10">10轮</span>
-            <span class="chip" data-val="15">15轮</span>
-            <span class="chip" data-val="20">20轮</span>
-            <span class="chip" data-val="0">不限</span>
-          </div>
-        </div>
-        <div class="rule-tip">
-          <strong>规则：</strong>显示一句经典台词（或上半句），玩家抢答下一句或补全台词。点击"揭晓答案"查看完整台词和出处。
-        </div>
-        <button class="btn-primary btn-full" onclick="startQuoteBattle()">开始游戏</button>
-      </div>
-    </div>
-
-    <!-- 台词飞花游戏页 -->
-    <div id="page-quote-play" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="endQuoteBattle()">‹</span>
-        <span class="page-title">台词飞花</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="quiz-play-content">
-        <div class="quiz-progress">
-          第 <span id="qb-num">1</span> / <span id="qb-total">10</span> 题
-        </div>
-        <div class="quiz-prompt-card">
-          <div class="quiz-prompt-label">经典台词</div>
-          <div class="quiz-prompt-text" id="qb-quote">台词内容</div>
-        </div>
-        <div class="quiz-answer-area" id="qb-answer-area" style="display:none">
-          <div class="quiz-answer-card">
-            <div class="quiz-answer-label">完整台词</div>
-            <div class="quiz-answer-text" id="qb-answer">答案</div>
-            <div class="quiz-source-text" id="qb-source">出处</div>
-          </div>
-        </div>
-        <button class="btn-primary btn-full" id="qb-reveal-btn" onclick="revealQuoteAnswer()">揭晓答案</button>
-        <button class="btn-primary btn-full" id="qb-next-btn" onclick="nextQuote()" style="display:none">下一题</button>
-        <button class="btn-danger btn-full btn-end" onclick="endQuoteBattle()">结束游戏</button>
-      </div>
-    </div>
-
-    <!-- 台词飞花结果页 -->
-    <div id="page-quote-result" class="page">
-      <div class="result-content">
-        <div class="result-icon">🎤</div>
-        <h2>游戏结束！</h2>
-        <p>共完成 <span id="qb-end-round">10</span> 题</p>
-        <div class="result-actions">
-          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
-          <button class="btn-primary" onclick="restartQuoteBattle()">再来一局</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== 经典复刻 ==================== -->
-    <!-- 经典复刻设置页 -->
-    <div id="page-scene-setup" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="navTo('home')">‹</span>
-        <span class="page-title">经典复刻</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="setup-content">
-        <div class="setup-section">
-          <h4>词库分类</h4>
-          <div class="chip-group" id="sg-category">
-            <span class="chip active" data-val="all">综合</span>
-            <span class="chip" data-val="movie">电影</span>
-            <span class="chip" data-val="skit">小品</span>
-            <span class="chip" data-val="tv">电视剧</span>
-            <span class="chip" data-val="anime">动漫</span>
-          </div>
-        </div>
-        <div class="setup-section">
-          <h4>游戏轮数</h4>
-          <div class="chip-group" id="sg-round">
-            <span class="chip" data-val="5">5轮</span>
-            <span class="chip active" data-val="10">10轮</span>
-            <span class="chip" data-val="15">15轮</span>
-            <span class="chip" data-val="20">20轮</span>
-            <span class="chip" data-val="0">不限</span>
-          </div>
-        </div>
-        <div class="rule-tip">
-          <strong>规则：</strong>显示一段经典影视/小品场景描述，玩家抢答作品名称。点击"揭晓答案"查看正确答案和出处。
-        </div>
-        <button class="btn-primary btn-full" onclick="startSceneGuess()">开始游戏</button>
-      </div>
-    </div>
-
-    <!-- 经典复刻游戏页 -->
-    <div id="page-scene-play" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="endSceneGuess()">‹</span>
-        <span class="page-title">经典复刻</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="quiz-play-content">
-        <div class="quiz-progress">
-          第 <span id="sg-num">1</span> / <span id="sg-total">10</span> 题
-        </div>
-        <div class="quiz-prompt-card">
-          <div class="quiz-prompt-label">场景描述</div>
-          <div class="quiz-prompt-text" id="sg-scene">场景内容</div>
-        </div>
-        <div class="quiz-answer-area" id="sg-answer-area" style="display:none">
-          <div class="quiz-answer-card">
-            <div class="quiz-answer-label">正确答案</div>
-            <div class="quiz-answer-text" id="sg-answer">答案</div>
-            <div class="quiz-source-text" id="sg-source">出处</div>
-          </div>
-        </div>
-        <button class="btn-primary btn-full" id="sg-reveal-btn" onclick="revealSceneAnswer()">揭晓答案</button>
-        <button class="btn-primary btn-full" id="sg-next-btn" onclick="nextScene()" style="display:none">下一题</button>
-        <button class="btn-danger btn-full btn-end" onclick="endSceneGuess()">结束游戏</button>
-      </div>
-    </div>
-
-    <!-- 经典复刻结果页 -->
-    <div id="page-scene-result" class="page">
-      <div class="result-content">
-        <div class="result-icon">🎬</div>
-        <h2>游戏结束！</h2>
-        <p>共完成 <span id="sg-end-round">10</span> 题</p>
-        <div class="result-actions">
-          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
-          <button class="btn-primary" onclick="restartSceneGuess()">再来一局</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== 看图猜影视 ==================== -->
-    <!-- 看图猜影视设置页 -->
-    <div id="page-emoji-setup" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="navTo('home')">‹</span>
-        <span class="page-title">看图猜影视</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="setup-content">
-        <div class="setup-section">
-          <h4>词库分类</h4>
-          <div class="chip-group" id="eg-category">
-            <span class="chip active" data-val="all">综合</span>
-            <span class="chip" data-val="movie">电影</span>
-            <span class="chip" data-val="skit">小品</span>
-            <span class="chip" data-val="tv">电视剧</span>
-            <span class="chip" data-val="anime">动漫</span>
-          </div>
-        </div>
-        <div class="setup-section">
-          <h4>游戏轮数</h4>
-          <div class="chip-group" id="eg-round">
-            <span class="chip" data-val="5">5轮</span>
-            <span class="chip active" data-val="10">10轮</span>
-            <span class="chip" data-val="15">15轮</span>
-            <span class="chip" data-val="20">20轮</span>
-            <span class="chip" data-val="0">不限</span>
-          </div>
-        </div>
-        <div class="rule-tip">
-          <strong>规则：</strong>显示一组表情符号，代表一部影视/小品/动漫作品。玩家抢答作品名称。点击"揭晓答案"查看正确答案。
-        </div>
-        <button class="btn-primary btn-full" onclick="startEmojiGuess()">开始游戏</button>
-      </div>
-    </div>
-
-    <!-- 看图猜影视游戏页 -->
-    <div id="page-emoji-play" class="page">
-      <div class="top-bar">
-        <span class="back-btn" onclick="endEmojiGuess()">‹</span>
-        <span class="page-title">看图猜影视</span>
-        <span style="width:24px"></span>
-      </div>
-      <div class="quiz-play-content">
-        <div class="quiz-progress">
-          第 <span id="eg-num">1</span> / <span id="eg-total">10</span> 题
-        </div>
-        <div class="emoji-prompt-card">
-          <div class="emoji-prompt-label">猜猜这是哪部作品</div>
-          <div class="emoji-display" id="eg-emoji">🎭🎬</div>
-        </div>
-        <div class="quiz-answer-area" id="eg-answer-area" style="display:none">
-          <div class="quiz-answer-card">
-            <div class="quiz-answer-label">正确答案</div>
-            <div class="quiz-answer-text" id="eg-answer">答案</div>
-          </div>
-        </div>
-        <button class="btn-primary btn-full" id="eg-reveal-btn" onclick="revealEmojiAnswer()">揭晓答案</button>
-        <button class="btn-primary btn-full" id="eg-next-btn" onclick="nextEmoji()" style="display:none">下一题</button>
-        <button class="btn-danger btn-full btn-end" onclick="endEmojiGuess()">结束游戏</button>
-      </div>
-    </div>
-
-    <!-- 看图猜影视结果页 -->
-    <div id="page-emoji-result" class="page">
-      <div class="result-content">
-        <div class="result-icon">🎭</div>
-        <h2>游戏结束！</h2>
-        <p>共完成 <span id="eg-end-round">10</span> 题</p>
-        <div class="result-actions">
-          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
-          <button class="btn-primary" onclick="restartEmojiGuess()">再来一局</button>
-        </div>
       </div>
     </div>
 
@@ -807,9 +538,6 @@
         <div class="wb-game-tabs">
           <span class="wb-game-tab active" data-game="undercover" onclick="switchWbGame('undercover')">谁是卧底</span>
           <span class="wb-game-tab" data-game="wordguess" onclick="switchWbGame('wordguess')">猜词助手</span>
-          <span class="wb-game-tab" data-game="quotebattle" onclick="switchWbGame('quotebattle')">台词飞花</span>
-          <span class="wb-game-tab" data-game="sceneguess" onclick="switchWbGame('sceneguess')">经典复刻</span>
-          <span class="wb-game-tab" data-game="emojiguess" onclick="switchWbGame('emojiguess')">看图猜影视</span>
         </div>
         <!-- 分类切换 -->
         <div class="wb-category-scroll" id="wb-category-list"></div>
@@ -857,8 +585,6 @@
 
   <script src="js/wordbank.js"></script>
   <script src="js/wordbank-manager.js"></script>
-  <script src="js/quote-data.js"></script>
-  <script src="js/quote-games.js"></script>
   <script src="js/single-mode.js"></script>
   <script src="js/app.js"></script>
 </body>
