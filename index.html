@@ -529,7 +529,7 @@
     </div>
 
     <!-- 狼人杀法官 - 游戏主流程页 -->
-    <div id="page-werewolf-game" class="page">
+    <div id="page-werewolf-game" class="page ww-game-page">
       <div class="top-bar">
         <span class="back-btn" onclick="wwEndGame()">‹</span>
         <span class="page-title" id="ww-phase-title">黑夜阶段</span>
@@ -546,6 +546,8 @@
         </div>
         <div class="ww-action-area" id="ww-action-area"></div>
         <div class="ww-player-panel" id="ww-player-panel"></div>
+      </div>
+      <div class="ww-sticky-bottom">
         <div class="ww-bottom-actions">
           <button class="btn-outline ww-btn-undo" id="ww-undo-btn" onclick="wwUndo()">撤销</button>
           <button class="btn-primary ww-btn-next" id="ww-next-btn" onclick="wwNext()">下一步</button>

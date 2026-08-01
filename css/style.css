@@ -2223,6 +2223,7 @@ body::after {
 }
 
 .ww-deal-area {
+  display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
@@ -2403,11 +2404,36 @@ body::after {
 }
 
 /* 游戏主流程页 */
+.ww-game-page {
+  padding-bottom: 0;
+}
+
+.ww-game-page ~ .bottom-nav,
+#page-werewolf-game.active ~ .bottom-nav {
+  display: none;
+}
+
 .ww-game-content {
   padding: 16px;
+  padding-bottom: 140px;
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.ww-sticky-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 248, 240, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--rule);
+  z-index: 50;
 }
 
 .ww-phase-indicator {
@@ -2491,6 +2517,12 @@ body::after {
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   margin-bottom: 12px;
+}
+
+@media (max-width: 380px) {
+  .ww-player-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .ww-player-cell {
@@ -2850,6 +2882,26 @@ body::after {
   color: var(--muted);
   font-weight: 600;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ww-panel-toggle {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ww-panel-body {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.ww-player-panel.collapsed .ww-panel-body {
+  max-height: 0;
 }
 
 .ww-panel-grid {
@@ -2937,11 +2989,19 @@ body::after {
 .ww-bottom-actions {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .ww-bottom-actions button {
   flex: 1;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.ww-sticky-bottom .btn-end {
+  padding: 10px;
+  font-size: 13px;
+  border-radius: 20px;
 }
 
 /* 结束页 */

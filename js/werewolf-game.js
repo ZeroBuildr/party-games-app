@@ -702,7 +702,11 @@ function wwShowEnd() {
 function wwRender() {
   const phaseName = wwPhaseNames[ww.phase] || '';
   const phaseEl = document.getElementById('ww-phase-title');
-  if (phaseEl) phaseEl.textContent = phaseName;
+  if (phaseEl && phaseEl.textContent !== phaseName) {
+    phaseEl.textContent = phaseName;
+    const page = document.getElementById('page-werewolf-game');
+    if (page) page.scrollTop = 0;
+  }
 
   const roundEl = document.getElementById('ww-round');
   if (roundEl) roundEl.textContent = ww.round;
@@ -1103,7 +1107,12 @@ function wwRenderHunterTargets(excludeNum) {
 function wwRenderPlayerPanel() {
   const container = document.getElementById('ww-player-panel');
   if (!container) return;
-  let html = '<div class="ww-panel-title">玩家状态</div>';
+  const collapsed = container.classList.contains('collapsed');
+  let html = `<div class="ww-panel-title" onclick="wwTogglePanel()">
+    <span>玩家状态</span>
+    <span class="ww-panel-toggle">${collapsed ? '展开 ▼' : '收起 ▲'}</span>
+  </div>`;
+  html += '<div class="ww-panel-body">';
   html += '<div class="ww-panel-grid">';
   ww.players.forEach(p => {
     const role = werewolfRoles[p.role];
@@ -1125,7 +1134,16 @@ function wwRenderPlayerPanel() {
     <span>神职 ${ww.players.filter(p => ['seer','witch','hunter','guard','idiot'].includes(p.role) && p.alive).length}</span>
     <span>平民 ${ww.players.filter(p => p.role === 'civilian' && p.alive).length}</span>
   </div>`;
+  html += '</div>';
   container.innerHTML = html;
+}
+
+function wwTogglePanel() {
+  const container = document.getElementById('ww-player-panel');
+  if (container) {
+    container.classList.toggle('collapsed');
+    wwRenderPlayerPanel();
+  }
 }
 
 function wwRenderButtons() {
