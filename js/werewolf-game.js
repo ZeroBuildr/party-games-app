@@ -54,8 +54,20 @@ function startWerewolf() {
   ww.dealIndex = 0;
   ww.dealRevealed = false;
   ww.dealDone = false;
+  wwSyncSetupChips();
   wwRenderSetupBoards();
   navTo('werewolf-setup');
+}
+
+function wwSyncSetupChips() {
+  document.querySelectorAll('#ww-player-count .chip').forEach(c => {
+    c.classList.toggle('active', parseInt(c.dataset.val) === ww.playerCount);
+  });
+  const checks = { sheriff: 'ww-opt-sheriff', selfSaveFirstNight: 'ww-opt-selfsave', lastWords: 'ww-opt-lastwords', selfKill: 'ww-opt-selfkill' };
+  for (const [key, id] of Object.entries(checks)) {
+    const el = document.getElementById(id);
+    if (el) el.checked = ww.options[key];
+  }
 }
 
 function wwRenderSetupBoards() {
@@ -716,19 +728,34 @@ function wwRender() {
   const stepNameEl = document.getElementById('ww-step-name');
   if (stepNameEl) stepNameEl.textContent = wwGetCurrentStepName();
 
-  const guideIconEl = document.getElementById('ww-guide-icon');
-  const guideTitleEl = document.getElementById('ww-guide-title');
-  const guideTextEl = document.getElementById('ww-guide-text');
-  const guide = wwGetGuide();
-  if (guideIconEl) guideIconEl.textContent = guide.icon;
-  if (guideTitleEl) guideTitleEl.textContent = guide.title;
-  if (guideTextEl) guideTextEl.innerHTML = guide.text.replace(/\n/g, '<br>');
+  const isDeal = ww.phase === 'deal';
+  const guideCard = document.querySelector('.ww-guide-card');
+  const playerPanel = document.getElementById('ww-player-panel');
+  const phaseIndicator = document.querySelector('.ww-phase-indicator');
+  const stickyBottom = document.querySelector('.ww-sticky-bottom');
+
+  if (guideCard) guideCard.style.display = isDeal ? 'none' : '';
+  if (playerPanel) playerPanel.style.display = isDeal ? 'none' : '';
+  if (phaseIndicator) phaseIndicator.style.display = isDeal ? 'none' : '';
+  if (stickyBottom) stickyBottom.style.display = isDeal ? 'none' : '';
+
+  if (!isDeal) {
+    const guideIconEl = document.getElementById('ww-guide-icon');
+    const guideTitleEl = document.getElementById('ww-guide-title');
+    const guideTextEl = document.getElementById('ww-guide-text');
+    const guide = wwGetGuide();
+    if (guideIconEl) guideIconEl.textContent = guide.icon;
+    if (guideTitleEl) guideTitleEl.textContent = guide.title;
+    if (guideTextEl) guideTextEl.innerHTML = guide.text.replace(/\n/g, '<br>');
+  }
 
   const actionArea = document.getElementById('ww-action-area');
   if (actionArea) actionArea.innerHTML = wwRenderActionArea();
 
-  wwRenderPlayerPanel();
-  wwRenderButtons();
+  if (!isDeal) {
+    wwRenderPlayerPanel();
+    wwRenderButtons();
+  }
 }
 
 function wwGetCurrentStepName() {
@@ -792,6 +819,13 @@ function wwGetGuide() {
 }
 
 function wwRenderActionArea() {
+  if (ww.phase === 'deal') {
+    return `<div class="ww-deal-start">
+      <div class="ww-deal-start-icon">🌙</div>
+      <div class="ww-deal-start-hint">所有玩家就位，准备开始夜晚</div>
+      <button class="btn-primary ww-deal-start-btn" onclick="wwStartNight()">开始夜晚</button>
+    </div>`;
+  }
   if (ww.pendingSkill && (ww.pendingSkill.type === 'hunter-night' || ww.pendingSkill.type === 'hunter-vote')) {
     return wwRenderHunterShoot();
   }

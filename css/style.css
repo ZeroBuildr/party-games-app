@@ -2421,6 +2421,44 @@ body::after {
   flex: 1;
 }
 
+/* 发牌阶段 - 大按钮居中 */
+.ww-deal-start {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px 20px;
+}
+
+.ww-deal-start-icon {
+  font-size: 56px;
+  animation: wwDealPulse 2s var(--ease-smooth) infinite;
+}
+
+@keyframes wwDealPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+.ww-deal-start-hint {
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.ww-deal-start-btn {
+  width: 80%;
+  max-width: 280px;
+  padding: 18px;
+  font-size: 20px;
+  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
+  font-weight: 400;
+  letter-spacing: 3px;
+  border-radius: 18px;
+}
+
 .ww-sticky-bottom {
   position: fixed;
   bottom: 0;
