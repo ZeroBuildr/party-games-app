@@ -256,11 +256,10 @@ function wwDealPrev() {
 }
 
 function wwStartGame() {
-  ww.phase = 'deal';
   ww.round = 1;
   wwAddLog(`第${ww.round}局开始，${ww.playerCount}人，${werewolfBoards[ww.boardType].name}`);
-  wwRender();
   navTo('werewolf-game');
+  wwStartNight();
 }
 
 // ==================== 夜晚流程 ====================
