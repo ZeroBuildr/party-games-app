@@ -2222,6 +2222,117 @@ body::after {
   padding: 20px 16px;
 }
 
+.ww-deal-area {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ww-deal-progress {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.ww-deal-card {
+  width: 100%;
+  max-width: 280px;
+  background: var(--white);
+  border: 2px solid var(--rule);
+  border-radius: 22px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.35s var(--ease-spring);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.ww-deal-card:active {
+  transform: scale(0.97);
+}
+
+.ww-deal-card.revealed {
+  border-color: var(--accent);
+  background: var(--gradient);
+  color: var(--white);
+  box-shadow: 0 8px 28px rgba(232, 93, 58, 0.25);
+}
+
+.ww-deal-card.revealed.wolf {
+  background: linear-gradient(135deg, #d63031, #e17055);
+  border-color: var(--danger);
+  box-shadow: 0 8px 28px rgba(214, 48, 49, 0.25);
+}
+
+.ww-deal-card.revealed.good {
+  background: linear-gradient(135deg, #00b894, #55a3ff);
+  border-color: var(--accent3);
+  box-shadow: 0 8px 28px rgba(46, 196, 182, 0.25);
+}
+
+.ww-deal-num {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ww-deal-cover {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 8px 0;
+}
+
+.ww-deal-card.revealed .ww-deal-cover {
+  display: none;
+}
+
+.ww-deal-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.ww-deal-name {
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.ww-deal-team {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+
+.ww-deal-hint {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 8px;
+}
+
+.ww-deal-card.revealed .ww-deal-hint {
+  opacity: 0.8;
+}
+
+.ww-deal-next-btn {
+  margin-bottom: 8px;
+}
+
+.ww-deal-prev-btn {
+  width: 100%;
+}
+
 .ww-roles-summary {
   text-align: center;
   margin-bottom: 16px;

@@ -510,20 +510,21 @@
       </div>
     </div>
 
-    <!-- 狼人杀法官 - 角色预览页 -->
+    <!-- 狼人杀法官 - 角色分配页（逐个查看） -->
     <div id="page-werewolf-roles" class="page">
       <div class="top-bar">
         <span class="back-btn" onclick="navTo('werewolf-setup')">‹</span>
-        <span class="page-title">角色分配（仅法官可见）</span>
+        <span class="page-title">角色分配</span>
         <span style="width:24px"></span>
       </div>
       <div class="ww-roles-content">
         <div class="ww-roles-summary" id="ww-roles-summary"></div>
-        <div class="ww-roles-list" id="ww-roles-list"></div>
-        <div class="rule-tip">
-          <strong>注意：</strong>请确保周围无其他玩家时查看。记下每个编号对应的身份，线下发放身份牌。
+        <div class="ww-deal-area" id="ww-deal-area"></div>
+        <div class="ww-roles-list" id="ww-roles-list" style="display:none"></div>
+        <div class="rule-tip" id="ww-roles-tip">
+          <strong>发牌流程：</strong>依次将手机交给对应编号玩家，点击卡片查看自己身份，看完后点击"下一位"。
         </div>
-        <button class="btn-primary btn-full" onclick="wwStartGame()">确认发牌，开始游戏</button>
+        <button class="btn-primary btn-full" id="ww-roles-btn" onclick="wwStartGame()">确认发牌，开始游戏</button>
       </div>
     </div>
 

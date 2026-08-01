@@ -25,6 +25,9 @@ let ww = {
   winner: null,
   winReason: '',
   selectedPlayer: null,
+  dealIndex: 0,
+  dealRevealed: false,
+  dealDone: false,
 };
 
 const wwPhaseNames = {
@@ -48,6 +51,9 @@ function startWerewolf() {
   ww.round = 0;
   ww.log = [];
   ww.winner = null;
+  ww.dealIndex = 0;
+  ww.dealRevealed = false;
+  ww.dealDone = false;
   wwRenderSetupBoards();
   navTo('werewolf-setup');
 }
@@ -122,32 +128,118 @@ function wwConfirmSetup() {
   ww.voteStack = [];
   ww.pkPlayers = [];
   ww.pendingSkill = null;
+  ww.dealIndex = 0;
+  ww.dealRevealed = false;
+  ww.dealDone = false;
   wwRenderRoles();
   navTo('werewolf-roles');
 }
 
 function wwRenderRoles() {
-  const container = document.getElementById('ww-roles-list');
-  if (!container) return;
   const config = getBoardConfig(ww.boardType, ww.playerCount);
-  container.innerHTML = ww.players.map(p => {
-    const role = werewolfRoles[p.role];
-    const teamClass = role.team === 'wolf' ? 'wolf' : 'good';
-    return `
-      <div class="ww-role-card ${teamClass}">
-        <div class="ww-role-num">${p.num}</div>
-        <div class="ww-role-icon">${role.icon}</div>
-        <div class="ww-role-info">
-          <div class="ww-role-name">${role.name}</div>
-          <div class="ww-role-team">${role.team === 'wolf' ? '狼人阵营' : '好人阵营'}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
   const summary = document.getElementById('ww-roles-summary');
   if (summary && config) {
     summary.innerHTML = `<span>${wwGetConfigText(ww.boardType, ww.playerCount)}</span>`;
+  }
+
+  const dealArea = document.getElementById('ww-deal-area');
+  const allList = document.getElementById('ww-roles-list');
+  const tip = document.getElementById('ww-roles-tip');
+  const btn = document.getElementById('ww-roles-btn');
+  if (!dealArea || !allList) return;
+
+  if (ww.dealDone) {
+    dealArea.style.display = 'none';
+    allList.style.display = 'flex';
+    if (tip) tip.innerHTML = '<strong>注意：</strong>所有玩家已查看身份。以下为全员身份，仅法官可见。';
+    if (btn) {
+      btn.textContent = '确认发牌，开始游戏';
+      btn.style.display = 'block';
+    }
+    allList.innerHTML = ww.players.map(p => {
+      const role = werewolfRoles[p.role];
+      const teamClass = role.team === 'wolf' ? 'wolf' : 'good';
+      return `
+        <div class="ww-role-card ${teamClass}">
+          <div class="ww-role-num">${p.num}</div>
+          <div class="ww-role-icon">${role.icon}</div>
+          <div class="ww-role-info">
+            <div class="ww-role-name">${role.name}</div>
+            <div class="ww-role-team">${role.team === 'wolf' ? '狼人阵营' : '好人阵营'}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    return;
+  }
+
+  allList.style.display = 'none';
+  dealArea.style.display = 'flex';
+  if (btn) btn.style.display = 'none';
+
+  const player = ww.players[ww.dealIndex];
+  if (!player) return;
+  const role = werewolfRoles[player.role];
+  const teamClass = role.team === 'wolf' ? 'wolf' : 'good';
+
+  let cardHtml;
+  if (ww.dealRevealed) {
+    cardHtml = `
+      <div class="ww-deal-card revealed ${teamClass}" onclick="wwHideDealCard()">
+        <div class="ww-deal-num">${player.num} 号</div>
+        <div class="ww-deal-icon">${role.icon}</div>
+        <div class="ww-deal-name">${role.name}</div>
+        <div class="ww-deal-team">${role.team === 'wolf' ? '狼人阵营' : '好人阵营'}</div>
+        <div class="ww-deal-hint">再次点击卡片隐藏</div>
+      </div>`;
+  } else {
+    cardHtml = `
+      <div class="ww-deal-card" onclick="wwRevealDealCard()">
+        <div class="ww-deal-num">${player.num} 号</div>
+        <div class="ww-deal-cover">?</div>
+        <div class="ww-deal-hint">点击查看你的身份</div>
+      </div>`;
+  }
+
+  const isLast = ww.dealIndex >= ww.players.length - 1;
+  dealArea.innerHTML = `
+    <div class="ww-deal-progress">玩家 ${player.num} / ${ww.playerCount} 查看身份</div>
+    ${cardHtml}
+    ${ww.dealRevealed ? `
+      <button class="btn-primary btn-full ww-deal-next-btn" onclick="wwDealNext()">
+        ${isLast ? '全部查看完毕' : '下一位玩家'}
+      </button>
+    ` : ''}
+    ${ww.dealIndex > 0 ? '<button class="btn-outline ww-deal-prev-btn" onclick="wwDealPrev()">上一位</button>' : ''}
+  `;
+}
+
+function wwRevealDealCard() {
+  ww.dealRevealed = true;
+  wwRenderRoles();
+}
+
+function wwHideDealCard() {
+  ww.dealRevealed = false;
+  wwRenderRoles();
+}
+
+function wwDealNext() {
+  if (ww.dealIndex >= ww.players.length - 1) {
+    ww.dealDone = true;
+    wwRenderRoles();
+  } else {
+    ww.dealIndex++;
+    ww.dealRevealed = false;
+    wwRenderRoles();
+  }
+}
+
+function wwDealPrev() {
+  if (ww.dealIndex > 0) {
+    ww.dealIndex--;
+    ww.dealRevealed = false;
+    wwRenderRoles();
   }
 }
 
