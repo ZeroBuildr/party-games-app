@@ -2471,9 +2471,7 @@ body::after {
   padding-bottom: 0;
 }
 
-.ww-game-page ~ .bottom-nav,
 #page-werewolf-game.active ~ .bottom-nav,
-.bk-game-page ~ .bottom-nav,
 #page-bk-game.active ~ .bottom-nav {
   display: none;
 }
