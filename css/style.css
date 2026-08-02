@@ -3676,6 +3676,11 @@ body::after {
   background: rgba(46, 196, 182, 0.04);
 }
 
+.bk-panel-cell.neutral {
+  border-color: var(--rule);
+  background: var(--card);
+}
+
 .bk-panel-num {
   display: block;
   font-family: 'Fredoka', sans-serif;

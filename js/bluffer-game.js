@@ -107,31 +107,6 @@ function bkRenderRoles() {
   const btn = document.getElementById('bk-roles-btn');
   if (!dealArea || !allList) return;
 
-  if (bk.dealDone) {
-    dealArea.style.display = 'none';
-    allList.style.display = 'flex';
-    if (tip) tip.innerHTML = '<strong>注意：</strong>所有玩家已查看身份。以下为全员身份，仅主持人可见。';
-    if (btn) {
-      btn.textContent = '确认发牌，开始游戏';
-      btn.style.display = 'block';
-    }
-    allList.innerHTML = bk.players.map(p => {
-      const role = blufferRoles[p.role];
-      const teamClass = p.role === 'bluffer' ? 'bluffer' : 'good';
-      return `
-        <div class="bk-role-card ${teamClass}">
-          <div class="bk-role-num">${p.num}</div>
-          <div class="bk-role-icon">${role.icon}</div>
-          <div class="bk-role-info">
-            <div class="bk-role-name">${role.name}</div>
-            <div class="bk-role-team">${p.role === 'bluffer' ? '瞎掰阵营' : '老实阵营'}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-    return;
-  }
-
   allList.style.display = 'none';
   dealArea.style.display = 'flex';
   if (btn) btn.style.display = 'none';
@@ -196,8 +171,7 @@ function bkHideDealCard() {
 
 function bkDealNext() {
   if (bk.dealIndex >= bk.players.length - 1) {
-    bk.dealDone = true;
-    bkRenderRoles();
+    bkStartGame();
   } else {
     bk.dealIndex++;
     bk.dealRevealed = false;
@@ -445,27 +419,52 @@ function bkRenderPlayerPanel() {
   const container = document.getElementById('bk-player-panel');
   if (!container) return;
   const collapsed = container.classList.contains('collapsed');
+
+  if (bk.phase === 'result') {
+    let html = `<div class="bk-panel-title" onclick="bkTogglePanel()">
+      <span>全员身份</span>
+      <span class="bk-panel-toggle">${collapsed ? '展开 ▼' : '收起 ▲'}</span>
+    </div>`;
+    html += '<div class="bk-panel-body">';
+    html += '<div class="bk-panel-grid">';
+    bk.players.forEach(p => {
+      const role = blufferRoles[p.role];
+      const teamClass = p.role === 'bluffer' ? 'bluffer' : 'good';
+      html += `<div class="bk-panel-cell ${teamClass}">
+        <span class="bk-panel-num">${p.num}</span>
+        <span class="bk-panel-icon">${role.icon}</span>
+        <span class="bk-panel-role">${role.name}</span>
+      </div>`;
+    });
+    html += '</div>';
+    html += '</div>';
+    container.innerHTML = html;
+    return;
+  }
+
   let html = `<div class="bk-panel-title" onclick="bkTogglePanel()">
     <span>玩家状态</span>
     <span class="bk-panel-toggle">${collapsed ? '展开 ▼' : '收起 ▲'}</span>
   </div>`;
   html += '<div class="bk-panel-body">';
   html += '<div class="bk-panel-grid">';
+  const speakOrder = bkGetSpeakOrder();
   bk.players.forEach(p => {
-    const role = blufferRoles[p.role];
-    const teamClass = p.role === 'bluffer' ? 'bluffer' : 'good';
-    html += `<div class="bk-panel-cell ${teamClass}">
+    const isSmart = p.role === 'smart';
+    const inSpeakOrder = speakOrder.includes(p);
+    const hasSpoken = p.spoken;
+    const isCurrentSpeaker = bk.phase === 'speak' && inSpeakOrder && speakOrder[bk.speakIndex] === p;
+    let statusIcon = '⏳';
+    if (isSmart) statusIcon = '👂';
+    else if (hasSpoken) statusIcon = '✓';
+    else if (isCurrentSpeaker) statusIcon = '🗣️';
+    html += `<div class="bk-panel-cell neutral">
       <span class="bk-panel-num">${p.num}</span>
-      <span class="bk-panel-icon">${role.icon}</span>
-      <span class="bk-panel-role">${role.name}</span>
+      <span class="bk-panel-icon">${statusIcon}</span>
+      <span class="bk-panel-role">${isSmart ? '听众' : hasSpoken ? '已发言' : isCurrentSpeaker ? '发言中' : '待发言'}</span>
     </div>`;
   });
   html += '</div>';
-  html += `<div class="bk-panel-stats">
-    <span>大聪明 1</span>
-    <span>老实人 1</span>
-    <span>瞎掰人 ${bk.playerCount - 2}</span>
-  </div>`;
   html += '</div>';
   container.innerHTML = html;
 }
