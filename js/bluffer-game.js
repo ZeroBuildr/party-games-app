@@ -119,9 +119,10 @@ function bkRenderRoles() {
   if (bk.dealRevealed) {
     let extraInfo = '';
     if (player.role === 'honest') {
+      const briefMeaning = bk.meaning.split('。')[0] + '。';
       extraInfo = `
         <div class="bk-deal-word">词汇：${bk.word}</div>
-        <div class="bk-deal-meaning">真实含义：${bk.meaning}</div>`;
+        <div class="bk-deal-meaning">简要含义：${briefMeaning}</div>`;
     } else if (player.role === 'bluffer') {
       extraInfo = `<div class="bk-deal-word">词汇：${bk.word}</div>
         <div class="bk-deal-hint-bluffer">你需要瞎掰这个词的含义</div>`;
