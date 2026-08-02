@@ -55,6 +55,14 @@
           </div>
           <span class="arrow">›</span>
         </div>
+        <div class="game-card" onclick="startBluffer()">
+          <div class="game-emoji">🎭</div>
+          <div class="game-info">
+            <h3>瞎掰王</h3>
+            <p>谁是真懂？谁是瞎掰？</p>
+          </div>
+          <span class="arrow">›</span>
+        </div>
       </div>
 
       <div class="wordbank-info">
@@ -556,6 +564,133 @@
       </div>
     </div>
 
+    <!-- 瞎掰王 - 设置页 -->
+    <div id="page-bk-setup" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">瞎掰王</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="setup-content">
+        <div class="setup-section">
+          <h4>游玩人数</h4>
+          <div class="chip-group" id="bk-player-count">
+            <span class="chip" data-val="3">3人</span>
+            <span class="chip" data-val="4">4人</span>
+            <span class="chip active" data-val="5">5人</span>
+            <span class="chip" data-val="6">6人</span>
+            <span class="chip" data-val="7">7人</span>
+            <span class="chip" data-val="8">8人</span>
+          </div>
+        </div>
+        <div class="setup-section">
+          <h4>词汇分类</h4>
+          <div class="chip-group" id="bk-category">
+            <span class="chip active" data-val="all" onclick="bkToggleCategory('all')">全部</span>
+            <span class="chip" data-val="idiom" onclick="bkToggleCategory('idiom')">成语典故</span>
+            <span class="chip" data-val="history" onclick="bkToggleCategory('history')">历史文化</span>
+            <span class="chip" data-val="nature" onclick="bkToggleCategory('nature')">自然百科</span>
+            <span class="chip" data-val="life" onclick="bkToggleCategory('life')">生活百科</span>
+            <span class="chip" data-val="dialect" onclick="bkToggleCategory('dialect')">方言俗语</span>
+          </div>
+        </div>
+        <div class="rule-tip">
+          <strong>角色分配：</strong>1位大聪明（投票找老实人）+ 1位老实人（知道真实含义）+ 其余瞎掰人（不知道含义，靠瞎掰）。大聪明找对老实人则获胜，找错则瞎掰阵营获胜。
+        </div>
+        <button class="btn-primary btn-full" onclick="bkConfirmSetup()">确认生成角色</button>
+      </div>
+    </div>
+
+    <!-- 瞎掰王 - 角色分配页 -->
+    <div id="page-bk-roles" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('bk-setup')">‹</span>
+        <span class="page-title">角色分配</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="ww-roles-content">
+        <div class="bk-deal-area" id="bk-deal-area"></div>
+        <div class="ww-roles-list" id="bk-roles-list" style="display:none"></div>
+        <div class="rule-tip" id="bk-roles-tip">
+          <strong>发牌流程：</strong>依次将手机交给对应编号玩家，点击卡片查看自己身份和词汇信息，看完后点击"下一位"。
+        </div>
+        <button class="btn-primary btn-full" id="bk-roles-btn" onclick="bkStartGame()" style="display:none">确认发牌，开始游戏</button>
+      </div>
+    </div>
+
+    <!-- 瞎掰王 - 游戏主流程页 -->
+    <div id="page-bk-game" class="page bk-game-page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="bkEndGame()">‹</span>
+        <span class="page-title" id="bk-phase-title">发言阶段</span>
+        <span class="ww-rules-btn" onclick="bkShowRules()">📖</span>
+      </div>
+      <div class="ww-game-content">
+        <div class="ww-phase-indicator">
+          <span id="bk-step-name">发言阶段</span>
+        </div>
+        <div class="bk-word-card">
+          <div class="bk-word-label">本轮词汇</div>
+          <div class="bk-word-text" id="bk-word">词汇</div>
+          <div class="bk-word-meaning" id="bk-meaning" style="display:none"></div>
+        </div>
+        <div class="ww-guide-card">
+          <div class="ww-guide-icon" id="bk-guide-icon">🎤</div>
+          <div class="ww-guide-title" id="bk-guide-title">发言阶段</div>
+          <div class="ww-guide-text" id="bk-guide-text">引导文案</div>
+        </div>
+        <div class="ww-action-area" id="bk-action-area"></div>
+        <div class="ww-player-panel" id="bk-player-panel"></div>
+      </div>
+      <div class="ww-sticky-bottom">
+        <div class="ww-bottom-actions">
+          <button class="btn-outline ww-btn-undo" id="bk-undo-btn" onclick="bkUndo()">撤销</button>
+          <button class="btn-primary ww-btn-next" id="bk-next-btn" onclick="bkNext()">下一步</button>
+        </div>
+        <button class="btn-danger btn-full btn-end" onclick="bkEndGame()">结束游戏</button>
+      </div>
+    </div>
+
+    <!-- 瞎掰王 - 结束页 -->
+    <div id="page-bk-end" class="page">
+      <div class="top-bar">
+        <span class="back-btn" onclick="navTo('home')">‹</span>
+        <span class="page-title">游戏结束</span>
+        <span style="width:24px"></span>
+      </div>
+      <div class="ww-end-content">
+        <div class="bk-end-winner" id="bk-end-winner">大聪明获胜</div>
+        <div class="ww-end-reason" id="bk-end-reason">原因</div>
+        <div class="ww-end-section">
+          <h4>词汇信息</h4>
+          <div class="bk-end-word" id="bk-end-word"></div>
+        </div>
+        <div class="ww-end-section">
+          <h4>角色身份</h4>
+          <div class="bk-end-roles" id="bk-end-roles"></div>
+        </div>
+        <div class="ww-end-section">
+          <h4>对局记录</h4>
+          <div class="ww-end-log" id="bk-end-log"></div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="navTo('home')">返回大厅</button>
+          <button class="btn-primary" onclick="bkRestart()">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 瞎掰王规则弹窗 -->
+    <div id="bk-rules-modal" class="modal-overlay" style="display:none">
+      <div class="modal-card ww-rules-modal-card">
+        <h3 class="modal-title">角色规则</h3>
+        <div class="ww-rules-content" id="bk-rules-content"></div>
+        <div class="modal-actions">
+          <button class="btn-primary" onclick="bkCloseRules()">知道了</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 狼人杀法官 - 结束页 -->
     <div id="page-werewolf-end" class="page">
       <div class="top-bar">
@@ -746,6 +881,8 @@
   <script src="js/single-mode.js"></script>
   <script src="js/werewolf-data.js"></script>
   <script src="js/werewolf-game.js"></script>
+  <script src="js/bluffer-data.js"></script>
+  <script src="js/bluffer-game.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

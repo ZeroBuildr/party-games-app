@@ -185,6 +185,12 @@ function initChipGroups() {
               wwRenderSetupBoards();
             }
           }
+        } else if (groupId === 'bk-player-count') {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          if (typeof bk !== 'undefined') {
+            bk.playerCount = parseInt(chip.dataset.val);
+          }
         }
       });
     });
@@ -268,6 +274,7 @@ function renderStats() {
     bomb: '💣 数字炸弹',
     wordguess: '🤔 猜词助手',
     werewolf: '🐺 狼人杀法官',
+    bluffer: '🎭 瞎掰王',
   };
   
   list.innerHTML = filtered.map(record => {
@@ -283,6 +290,8 @@ function renderStats() {
       detail = `猜中${record.correct}个 · 跳过${record.skip}个 · ${record.duration}秒`;
     } else if (record.game === 'werewolf') {
       detail = `${record.players}人 · ${record.rounds}局 · ${record.result}`;
+    } else if (record.game === 'bluffer') {
+      detail = `${record.players}人 · 词汇「${record.word}」· ${record.result}`;
     }
     
     return `

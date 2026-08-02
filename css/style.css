@@ -2409,7 +2409,9 @@ body::after {
 }
 
 .ww-game-page ~ .bottom-nav,
-#page-werewolf-game.active ~ .bottom-nav {
+#page-werewolf-game.active ~ .bottom-nav,
+.bk-game-page ~ .bottom-nav,
+#page-bk-game.active ~ .bottom-nav {
   display: none;
 }
 
@@ -3150,4 +3152,556 @@ body::after {
 
 .ww-rule-item strong {
   color: var(--accent);
+}
+
+/* ==================== 瞎掰王 ==================== */
+
+/* 游戏卡片第5个配色 */
+.game-card:nth-child(5) { animation-delay: 0.40s; }
+.game-card:nth-child(5) .game-emoji { background: rgba(108, 92, 231, 0.12); }
+
+/* 词汇卡 */
+.bk-word-card {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 16px;
+  text-align: center;
+  color: var(--white);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.25);
+}
+
+.bk-word-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.bk-word-text {
+  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+.bk-word-meaning {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 发牌阶段 */
+.bk-deal-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 16px;
+  gap: 16px;
+}
+
+.bk-deal-progress {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.bk-deal-card {
+  width: 100%;
+  max-width: 320px;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--rule);
+  cursor: pointer;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.bk-deal-card:active {
+  transform: scale(0.97);
+}
+
+.bk-deal-card.revealed {
+  border-color: #6c5ce7;
+  background: linear-gradient(135deg, #6c5ce708, #a29bfe08);
+}
+
+.bk-deal-num {
+  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
+  font-size: 22px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.bk-deal-cover {
+  font-size: 64px;
+  color: var(--accent);
+  font-weight: 700;
+  margin: 16px 0;
+}
+
+.bk-deal-hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.bk-deal-icon {
+  font-size: 40px;
+  margin: 8px 0;
+}
+
+.bk-deal-name {
+  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.bk-deal-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  padding: 0 8px;
+}
+
+.bk-deal-word {
+  background: rgba(108, 92, 231, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6c5ce7;
+  margin-top: 8px;
+}
+
+.bk-deal-meaning {
+  background: rgba(46, 196, 182, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  color: var(--success);
+  margin-top: 6px;
+}
+
+.bk-deal-hint-bluffer {
+  background: rgba(232, 93, 58, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 6px;
+}
+
+.bk-deal-hint-smart {
+  background: rgba(245, 166, 35, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--accent2);
+  margin-top: 6px;
+}
+
+.bk-deal-rehint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.bk-deal-next-btn {
+  margin-top: 4px;
+}
+
+.bk-deal-prev-btn {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* 角色卡列表 */
+.bk-role-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.bk-role-card.bluffer {
+  border-left-color: #6c5ce7;
+}
+
+.bk-role-card.good {
+  border-left-color: var(--accent3);
+}
+
+.bk-role-num {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 32px;
+}
+
+.bk-role-icon {
+  font-size: 24px;
+}
+
+.bk-role-info {
+  flex: 1;
+}
+
+.bk-role-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.bk-role-team {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 发言列表 */
+.bk-speak-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.bk-speak-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid transparent;
+  transition: all 0.25s var(--ease-spring);
+}
+
+.bk-speak-item.current {
+  border-color: var(--accent);
+  background: rgba(232, 93, 58, 0.05);
+  transform: scale(1.02);
+}
+
+.bk-speak-item.done {
+  opacity: 0.5;
+}
+
+.bk-speak-num {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.bk-speak-status {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.bk-speak-item.current .bk-speak-status {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 玩家选择网格 */
+.bk-select-label {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.bk-player-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 380px) {
+  .bk-player-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.bk-player-cell {
+  aspect-ratio: 1;
+  background: var(--white);
+  border: 2px solid var(--rule);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.bk-player-cell:active {
+  transform: scale(0.92);
+}
+
+.bk-player-cell.selected {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  border-color: #6c5ce7;
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25);
+}
+
+.bk-selected-info {
+  text-align: center;
+  font-size: 14px;
+  color: #6c5ce7;
+  font-weight: 600;
+  padding: 8px;
+}
+
+/* 结果展示 */
+.bk-result-card {
+  border-radius: 16px;
+  padding: 24px 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.bk-result-card.good {
+  background: linear-gradient(135deg, rgba(46, 196, 182, 0.12), rgba(46, 196, 182, 0.04));
+  border: 2px solid var(--accent3);
+}
+
+.bk-result-card.bluffer {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(108, 92, 231, 0.04));
+  border: 2px solid #6c5ce7;
+}
+
+.bk-result-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.bk-result-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.bk-result-vote {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.bk-result-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bk-reveal-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--rule);
+}
+
+.bk-reveal-item.voted {
+  border-left-color: var(--accent);
+}
+
+.bk-reveal-item.honest {
+  border-left-color: var(--accent3);
+}
+
+.bk-reveal-num {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 36px;
+}
+
+.bk-reveal-role {
+  flex: 1;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.bk-reveal-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(232, 93, 58, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.bk-reveal-tag.honest {
+  background: rgba(46, 196, 182, 0.1);
+  color: var(--accent3);
+}
+
+/* 玩家面板 */
+.bk-panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--white);
+  border-radius: 12px 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  border-bottom: 1px solid var(--rule);
+}
+
+.bk-panel-toggle {
+  font-size: 12px;
+  color: #6c5ce7;
+  font-weight: 500;
+}
+
+.bk-panel-body {
+  padding: 12px 14px;
+  background: var(--white);
+  border-radius: 0 0 12px 12px;
+}
+
+.bk-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.bk-panel-cell {
+  padding: 8px 4px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 11px;
+  border: 2px solid var(--rule);
+}
+
+.bk-panel-cell.bluffer {
+  border-color: rgba(108, 92, 231, 0.3);
+  background: rgba(108, 92, 231, 0.04);
+}
+
+.bk-panel-cell.good {
+  border-color: rgba(46, 196, 182, 0.3);
+  background: rgba(46, 196, 182, 0.04);
+}
+
+.bk-panel-num {
+  display: block;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.bk-panel-icon {
+  font-size: 18px;
+  display: block;
+  margin: 2px 0;
+}
+
+.bk-panel-role {
+  display: block;
+  color: var(--muted);
+}
+
+.bk-panel-stats {
+  display: flex;
+  justify-content: space-around;
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+.bk-panel-title.collapsed + .bk-panel-body {
+  display: none;
+}
+
+/* 结束页 */
+.bk-end-winner {
+  font-family: 'ZCOOL KuaiLe', 'Fredoka', sans-serif;
+  font-size: 28px;
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+}
+
+.bk-end-winner.good {
+  background: linear-gradient(135deg, rgba(46, 196, 182, 0.12), rgba(46, 196, 182, 0.04));
+  color: var(--accent3);
+}
+
+.bk-end-winner.bluffer {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(108, 92, 231, 0.04));
+  color: #6c5ce7;
+}
+
+.bk-end-word {
+  padding: 14px 16px;
+  background: var(--white);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.7;
+  box-shadow: var(--shadow-sm);
+}
+
+.bk-end-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bk-end-role {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  font-size: 14px;
+}
+
+.bk-rule-item {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.7;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: var(--bg2);
+  border-radius: 8px;
+}
+
+.bk-rule-item strong {
+  color: #6c5ce7;
 }
