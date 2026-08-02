@@ -66,7 +66,7 @@
       </div>
 
       <div class="wordbank-info">
-        <span>已收录 5000+ 词汇 · 18大分类</span>
+        <span>已收录 6000+ 词汇 · 18大分类</span>
       </div>
     </div>
 
@@ -831,15 +831,19 @@
         <div class="wb-game-tabs">
           <span class="wb-game-tab active" data-game="undercover" onclick="switchWbGame('undercover')">谁是卧底</span>
           <span class="wb-game-tab" data-game="wordguess" onclick="switchWbGame('wordguess')">猜词助手</span>
+          <span class="wb-game-tab" data-game="bluffer" onclick="switchWbGame('bluffer')">瞎掰王</span>
         </div>
         <!-- 分类切换 -->
         <div class="wb-category-scroll" id="wb-category-list"></div>
         <!-- 词汇列表 -->
         <div class="wb-word-list" id="wb-word-list"></div>
+        <!-- 批量导入 -->
+        <div class="wb-import-section" id="wb-import-area" style="display:none"></div>
         <!-- 添加词汇 -->
         <div class="wb-add-section" id="wb-add-section">
           <div class="wb-add-inputs" id="wb-add-inputs"></div>
           <button class="btn-primary btn-full" onclick="addCustomWord()">添加</button>
+          <button class="btn-outline btn-full wb-import-toggle-btn" onclick="toggleImportArea()">批量导入</button>
         </div>
       </div>
     </div>
